@@ -81,7 +81,7 @@
           "helm-intellisense-x.chartRootPath": {
             "type": "string",
             "default": "default",
-            "description": "Chart Root Path。可用值 'default', 'current', '绝对路径（/path/to/chartRootPath'"
+            "description": "Chart Root Path。可用值为 'default'、'current'、'绝对路径(/path/to/chartRootPath)'"
           },
           "helm-intellisense-x.maxRecursionDepthOfRootPath": {
             "type": "number",
