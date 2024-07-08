@@ -31,7 +31,7 @@
         "extensions": [
           ""
         ],
-        "firstLine": "^(#\\s+\\bhelm(-template)\\b|{{-?.*)$",
+        "firstLine": "^(#\\s+\\bhelm(-template)?\\b|{{-?.*)$",
         "filenamePatterns": [
           "**/templates/**/*.tpl"
         ],

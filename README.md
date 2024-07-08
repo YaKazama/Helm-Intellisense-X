@@ -69,7 +69,7 @@ VS Code 插件。基于 [Helm-Intellisense](https://github.com/tim-koehler/Helm-
       "extensions": [
         ""
       ],
-      "firstLine": "^(#\\s+\\bhelm(-template)\\b|{{-?.*)$",
+      "firstLine": "^(#\\s+\\bhelm(-template)?\\b|{{-?.*)$",
       "filenamePatterns": [
         "**/templates/**/*.tpl"
       ],
