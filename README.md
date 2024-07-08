@@ -41,3 +41,39 @@ VS Code 插件。基于 [Helm-Intellisense](https://github.com/tim-koehler/Helm-
 - `helm-intellisense-x.parseVariablesOfCurrentNamedTemplate(true)`: 是否从当前光标位置向上检索命名模板，当遇到 *define* 时，立即停止。为 false 时会检索至文件开始位置
 - `helm-intellisense-x.separators("")`: [功能未启用]分隔符，为空则使用全局定义。参考 'editor.separators'
 - `helm-intellisense-x.separatorsExclude("")`: [功能未启用]需要排除的分隔符
+
+## 注意事项
+
+- 默认不绑定 `.yaml` 文件，有需要时建议配合“设置”中的 `files.associations` 来修改特定路径下的 YAML 文件的语言模式
+
+  ```json
+  "files.associations": {
+    "**/templates/**/*.{yaml,yml}"
+  }
+  ```
+
+  也可以使用快捷键 `Cmd+k m` 或点击界面右下角相应的位置来临时修改
+
+- 未知类型的文件，如果第一行能匹配到正则表达式：`^(#\\s+\\bhelm(-template)\\b|{{-?.*)$`，则会被识别为 `Helm` 类型的文件，以下是完整的 `languages` 设置
+
+  ```json
+  "languages": [
+    {
+      "id": "helm-template",
+      "aliases": [
+        "Helm",
+        "Helm Template",
+        "helm",
+        "helm-template"
+      ],
+      "extensions": [
+        ""
+      ],
+      "firstLine": "^(#\\s+\\bhelm(-template)\\b|{{-?.*)$",
+      "filenamePatterns": [
+        "**/templates/**/*.tpl"
+      ],
+      "configuration": "./language-configuration.json"
+    }
+  ]
+  ```

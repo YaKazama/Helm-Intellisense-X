@@ -5,7 +5,7 @@
   "version": "1.0.0",
   "license": "MIT",
   "publisher": "YaKazama",
-  "icon": "./icon/helm.png",
+  "icon": "./icons/helm.png",
   "repository": {
     "url": "https://github.com/YaKazama/Helm-Intellisense-X"
   },
@@ -24,15 +24,21 @@
         "id": "helm-template",
         "aliases": [
           "Helm",
-          "Helm Template"
+          "Helm Template",
+          "helm",
+          "helm-template"
         ],
         "extensions": [
           ""
         ],
+        "firstLine": "^(#\\s+\\bhelm(-template)\\b|{{-?.*)$",
         "filenamePatterns": [
-          "**/templates/**/*.{yaml,yml}",
           "**/templates/**/*.tpl"
         ],
+        "icon": {
+          "dark": "./icons/helm.svg",
+          "light": "./icons/helm.svg"
+        },
         "configuration": "./language-configuration.json"
       },
       {
@@ -68,12 +74,12 @@
         "path": "./snippets/helm-template.code-snippets"
       }
     ],
-    "configuration":[
+    "configuration": [
       {
         "title": "helm-intellisense-x",
         "properties": {
           "helm-intellisense-x.chartRootPath": {
-            "type":"string",
+            "type": "string",
             "default": "default",
             "description": "Chart Root Path。可用值 'default', 'current', '绝对路径（/path/to/chartRootPath'"
           },
@@ -154,15 +160,20 @@
     ]
   },
   "scripts": {
-    "vscode:prepublish": "pnpm run compile",
-    "compile": "tsc -p ./",
-    "watch": "tsc -watch -p ./",
-    "pretest": "pnpm run compile && pnpm run lint",
+    "vscode:prepublish": "npm run package",
+    "compile": "npm run check-types && npm run lint && node esbuild.js",
+    "watch": "npm-run-all -p watch:*",
+    "watch:esbuild": "node esbuild.js --watch",
+    "watch:tsc": "tsc --noEmit --watch --project tsconfig.json",
+    "package": "npm run check-types && npm run lint && node esbuild.js --production",
+    "compile-tests": "tsc -p . --outDir out",
+    "watch-tests": "tsc -p . -w --outDir out",
+    "pretest": "npm run compile-tests && npm run compile && npm run lint",
+    "check-types": "tsc --noEmit",
     "lint": "eslint src --ext ts",
     "test": "vscode-test"
   },
   "devDependencies": {
-    "@types/glob": "^8.1.0",
     "@types/js-yaml": "^4.0.9",
     "@types/lodash": "^4.17.6",
     "@types/mocha": "^10.0.7",
@@ -172,7 +183,9 @@
     "@typescript-eslint/parser": "^7.11.0",
     "@vscode/test-cli": "^0.0.9",
     "@vscode/test-electron": "^2.4.0",
+    "esbuild": "^0.21.5",
     "eslint": "^8.57.0",
+    "npm-run-all": "^4.1.5",
     "typescript": "^5.4.5"
   },
   "dependencies": {
