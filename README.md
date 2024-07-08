@@ -48,7 +48,7 @@ VS Code 插件。基于 [Helm-Intellisense](https://github.com/tim-koehler/Helm-
 
   ```json
   "files.associations": {
-    "**/templates/**/*.{yaml,yml}"
+    "**/templates/**/*.{yaml,yml}": "helm-template"
   }
   ```
 
