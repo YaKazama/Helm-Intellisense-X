@@ -5,6 +5,10 @@
   "version": "1.0.0",
   "license": "MIT",
   "publisher": "YaKazama",
+  "icon": "./icon/helm.png",
+  "repository": {
+    "url": "https://github.com/YaKazama/Helm-Intellisense-X"
+  },
   "engines": {
     "vscode": "^1.91.0"
   },
@@ -93,10 +97,8 @@
             "description": "需要排除的 yaml 文件或目录"
           },
           "helm-intellisense-x.valuesReverse": {
-            "type": "array",
-            "default": [
-              "node_modules/**"
-            ],
+            "type": "boolean",
+            "default": false,
             "description": "反转 values 定义的列表"
           },
           "helm-intellisense-x.templates": {

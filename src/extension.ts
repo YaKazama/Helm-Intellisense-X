@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
-import { JumpToNamedTemplatesDefinitionProvider } from "./DefinitionProvider/helm/JumpToNamedTemplates";
-import { JumpToVariablesDefinitionProvider } from "./DefinitionProvider/helm/JumpToVariables";
-import { JumpToValuesDefinitionProvider } from "./DefinitionProvider/yaml/JumpToValues";
+import { JumpToNamedTemplatesDefinitionProvider } from "./DefinitionProviders/helm/JumpToNamedTemplates";
+import { JumpToVariablesDefinitionProvider } from "./DefinitionProviders/helm/JumpToVariables";
+import { JumpToValuesDefinitionProvider } from "./DefinitionProviders/yaml/JumpToValues";
 import { CapabilitiesCompletionItemProvider } from "./CompletionProviders/helm/Capabilities";
 import { ChartCompletionItemProvider } from "./CompletionProviders/helm/Chart";
 import { FilesCompletionItemProvider } from "./CompletionProviders/helm/Files";
