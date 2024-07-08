@@ -1,0 +1,181 @@
+{
+  "name": "helm-intellisense-x",
+  "displayName": "Helm Intellisense X",
+  "description": "Helm Intellisense X",
+  "version": "1.0.0",
+  "license": "MIT",
+  "publisher": "YaKazama",
+  "engines": {
+    "vscode": "^1.91.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [],
+    "languages": [
+      {
+        "id": "helm-template",
+        "aliases": [
+          "Helm",
+          "Helm Template"
+        ],
+        "extensions": [
+          ""
+        ],
+        "filenamePatterns": [
+          "**/templates/**/*.{yaml,yml}",
+          "**/templates/**/*.tpl"
+        ],
+        "configuration": "./language-configuration.json"
+      },
+      {
+        "id": "yaml",
+        "aliases": [
+          "YAML",
+          "yaml"
+        ],
+        "extensions": [
+          ".yml",
+          ".eyaml",
+          ".eyml",
+          ".yaml"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "helm-template",
+        "scopeName": "source.helm-template",
+        "path": "./syntaxes/helm-template.tmLanguage.json"
+      },
+      {
+        "language": "yaml",
+        "scopeName": "source.yaml",
+        "path": "./syntaxes/yaml.tmLanguage.json"
+      }
+    ],
+    "snippets": [
+      {
+        "language": "helm-template",
+        "path": "./snippets/helm-template.code-snippets"
+      }
+    ],
+    "configuration":[
+      {
+        "title": "helm-intellisense-x",
+        "properties": {
+          "helm-intellisense-x.chartRootPath": {
+            "type":"string",
+            "default": "default",
+            "description": "Chart Root Path。可用值 'default', 'current', '绝对路径（/path/to/chartRootPath'"
+          },
+          "helm-intellisense-x.maxRecursionDepthOfRootPath": {
+            "type": "number",
+            "default": 10,
+            "description": "以当前文件为基准，检索确定 chartRootPath 时，允许向前递归检索的目录层级。超过此值仍未找到，则使用 workspaceFolder 替换。当 chartRootPath = 'current' 时生效"
+          },
+          "helm-intellisense-x.values": {
+            "type": "array",
+            "default": [
+              "values.yaml"
+            ],
+            "description": "需要按序解析的 yaml 文件或目录。支持 glob 模式"
+          },
+          "helm-intellisense-x.valuesExclude": {
+            "type": "array",
+            "default": [
+              "node_modules/**"
+            ],
+            "description": "需要排除的 yaml 文件或目录"
+          },
+          "helm-intellisense-x.valuesReverse": {
+            "type": "array",
+            "default": [
+              "node_modules/**"
+            ],
+            "description": "反转 values 定义的列表"
+          },
+          "helm-intellisense-x.templates": {
+            "type": "array",
+            "default": [
+              "**/*.tpl"
+            ],
+            "description": "需要加载的 templates 文件或目录。支持 glob 解析"
+          },
+          "helm-intellisense-x.templatesExclude": {
+            "type": "array",
+            "default": [
+              "node_modules/**"
+            ],
+            "description": "需要排除的 templates 文件或目录。支持 glob 解析"
+          },
+          "helm-intellisense-x.readFileMode": {
+            "type": "string",
+            "default": "single",
+            "enum": [
+              "single",
+              "all"
+            ],
+            "description": "解析文件时的读取模式。single 每个文件独立读取并处理； all 一次性读取所有文件后再进行处理"
+          },
+          "helm-intellisense-x.variablesCurrentFile": {
+            "type": "boolean",
+            "default": true,
+            "description": "是否只在当前文件内全文检索变量。为 false 时会在 chartRootPath 范围内检索所有 .tpl 文件"
+          },
+          "helm-intellisense-x.variablesCurrentPosition": {
+            "type": "boolean",
+            "default": true,
+            "description": "是否从当前光标位置向上检索变量。为 false 时会检索至文件开始位置。当 variables.currentFile = true 时生效"
+          },
+          "helm-intellisense-x.parseVariablesOfCurrentNamedTemplate": {
+            "type": "boolean",
+            "default": true,
+            "description": "是否从当前光标位置向上检索命名模板，当遇到 define 时，立即停止。为 false 时会检索至文件开始位置"
+          },
+          "helm-intellisense-x.separators": {
+            "type": "string",
+            "default": "",
+            "description": "[功能未启用]分隔符，为空则使用全局定义。参考 'editor.separators'"
+          },
+          "helm-intellisense-x.separatorsExclude": {
+            "type": "string",
+            "default": "",
+            "description": "[功能未启用]需要排除的分隔符"
+          }
+        }
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "pnpm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "pnpm run compile && pnpm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "vscode-test"
+  },
+  "devDependencies": {
+    "@types/glob": "^8.1.0",
+    "@types/js-yaml": "^4.0.9",
+    "@types/lodash": "^4.17.6",
+    "@types/mocha": "^10.0.7",
+    "@types/node": "20.x",
+    "@types/vscode": "^1.91.0",
+    "@typescript-eslint/eslint-plugin": "^7.14.1",
+    "@typescript-eslint/parser": "^7.11.0",
+    "@vscode/test-cli": "^0.0.9",
+    "@vscode/test-electron": "^2.4.0",
+    "eslint": "^8.57.0",
+    "typescript": "^5.4.5"
+  },
+  "dependencies": {
+    "glob": "^10.4.2",
+    "js-yaml": "^4.1.0",
+    "lodash": "^4.17.21"
+  }
+}
