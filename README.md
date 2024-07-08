@@ -37,7 +37,9 @@ VS Code 插件。基于 [Helm-Intellisense](https://github.com/tim-koehler/Helm-
   - `single`: 每个文件独立读取并处理
   - `all`: 一次性读取所有文件后再进行处理
 - `helm-intellisense-x.variablesCurrentFile(true)`: 是否只在当前文件内全文检索变量。为 false 时会在 chartRootPath 范围内检索所有 .tpl 文件
-- `helm-intellisense-x.variablesCurrentPosition(true)`: 是否从当前光标位置向上检索变量。为 false 时会检索至文件开始位置。当 `variables.currentFile = true` 时生效
+- `helm-intellisense-x.variablesCurrentPosition(true)`: 是否从当前光标位置向上检索变量。为 false 时会检索至文件开始位置。当 `variablesCurrentFile = true` 时生效
+- `helm-intellisense-x.valuesCurrentFile(true)`: 是否只在当前文件内全文检索变量。为 false 时会在 chartRootPath 范围内检索所有 .yaml 文件
+- `helm-intellisense-x.valuesCurrentPosition(true)`: 是否从当前光标位置向上检索变量。为 false 时会检索至文件开始位置。当 `valuesCurrentFile = true` 时生效
 - `helm-intellisense-x.parseVariablesOfCurrentNamedTemplate(true)`: 是否从当前光标位置向上检索命名模板，当遇到 *define* 时，立即停止。为 false 时会检索至文件开始位置
 - `helm-intellisense-x.separators("")`: [功能未启用]分隔符，为空则使用全局定义。参考 'editor.separators'
 - `helm-intellisense-x.separatorsExclude("")`: [功能未启用]需要排除的分隔符
@@ -45,6 +47,8 @@ VS Code 插件。基于 [Helm-Intellisense](https://github.com/tim-koehler/Helm-
 ## 注意事项
 
 - 默认不绑定 `.yaml` 文件，有需要时建议配合“设置”中的 `files.associations` 来修改特定路径下的 YAML 文件的语言模式
+
+  > 这里强烈推荐使用绝对路径，下面的这种使用方式，很容易造成所有的 yaml 文件都被改变语言模式
 
   ```json
   "files.associations": {
@@ -77,3 +81,23 @@ VS Code 插件。基于 [Helm-Intellisense](https://github.com/tim-koehler/Helm-
     }
   ]
   ```
+
+## 已知问题
+
+- 在 yaml 文件中使用 helm 模板配置时，由于文件类型是 yaml，如果使用了 [YAML 插件](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-yaml&ssr=false#overview)，会造成 `.Values.xxx`、`.Chart.xxx` 无法跳转。如下所示，`.Values.ABC` 中的 `ABC` 无法跳转
+
+  ```yaml
+  {{- $_ := set . "Context" .Values.ABC }}
+
+  {{- if .Context.enable }}
+    {{- include "workloads.Deployment" . }}
+  {{- end }}
+  ```
+
+  **原因：**
+
+  [YAML 插件](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-yaml&ssr=false#overview) 改变了 [wordPattern](https://github.com/redhat-developer/vscode-yaml/blob/main/language-configuration.json#L37)，致使英文句号（.）不会作为分隔符
+
+  **解决方案**
+
+  将文件类型（语言模式）从 `YAML` 切换为 `Helm` 即可

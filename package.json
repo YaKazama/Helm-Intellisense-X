@@ -16,7 +16,7 @@
     "Other"
   ],
   "activationEvents": [],
-  "main": "./out/extension.js",
+  "main": "./dist/extension.js",
   "contributes": {
     "commands": [],
     "languages": [
@@ -138,7 +138,17 @@
           "helm-intellisense-x.variablesCurrentPosition": {
             "type": "boolean",
             "default": true,
-            "description": "是否从当前光标位置向上检索变量。为 false 时会检索至文件开始位置。当 variables.currentFile = true 时生效"
+            "description": "是否从当前光标位置向上检索变量。为 false 时会检索至文件开始位置。当 variablesCurrentFile = true 时生效"
+          },
+          "helm-intellisense-x.valuesCurrentFile": {
+            "type": "boolean",
+            "default": true,
+            "description": "是否只在当前文件内全文检索变量。为 false 时会在 chartRootPath 范围内检索所有 .yaml 文件"
+          },
+          "helm-intellisense-x.valuesCurrentPosition": {
+            "type": "boolean",
+            "default": true,
+            "definitions": "是否从当前光标位置向上检索变量。为 false 时会检索至文件开始位置。当 valuesCurrentFile = true 时生效"
           },
           "helm-intellisense-x.parseVariablesOfCurrentNamedTemplate": {
             "type": "boolean",

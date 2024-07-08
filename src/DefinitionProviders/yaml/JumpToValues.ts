@@ -17,9 +17,9 @@ export class JumpToValuesDefinitionProvider implements vscode.DefinitionProvider
     if (pattern.test(transferString)) {
       // 从文件开头往后找，匹配成功则停止
       const config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('helm-intellisense-x')
-      const parseVariablesOfCurrentFile: boolean = config.get('variablesCurrentFile', true)
+      const parseValuesOfCurrentFile: boolean = config.get('valuesCurrentFile', false)
       // true 从开头到光标行；false 全文检索
-      const parseVariablesOfCurrentPosition: boolean = config.get('variablesCurrentPosition', true)
+      const parseValuesOfCurrentPosition: boolean = config.get('valuesCurrentPosition', true)
 
       // 处理 Chart
       //  要将 currentString 首字母小写
@@ -30,10 +30,10 @@ export class JumpToValuesDefinitionProvider implements vscode.DefinitionProvider
         isChart = true
       }
 
-      if (parseVariablesOfCurrentFile) {
+      if (parseValuesOfCurrentFile) {
         let endLine: vscode.Position = position
         // 注意这个地方是 取反
-        if (!parseVariablesOfCurrentPosition) {
+        if (!parseValuesOfCurrentPosition) {
           const lastLineNumber = document.lineCount - 1
           const lastLine = document.lineAt(lastLineNumber)
           endLine = new vscode.Position(lastLineNumber, lastLine.text.length)
