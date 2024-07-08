@@ -1,7 +1,6 @@
 # ---> Basic
 # ide
 **/.github
-**/.vscode
 **/.idea
 
 # build
