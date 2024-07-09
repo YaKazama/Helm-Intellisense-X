@@ -41,7 +41,7 @@ VS Code 插件。基于 [Helm-Intellisense](https://github.com/tim-koehler/Helm-
 - `helm-intellisense-x.valuesCurrentFile(true)`: 是否只在当前文件内全文检索变量。为 false 时会在 chartRootPath 范围内检索所有 .yaml 文件
 - `helm-intellisense-x.valuesCurrentPosition(true)`: 是否从当前光标位置向上检索变量。为 false 时会检索至文件开始位置。当 `valuesCurrentFile = true` 时生效
 - `helm-intellisense-x.valuesMappingEnable(false)`: 是否开启 yaml 文件的“键映射：跳转到定义”功能
-- `helm-intellisense-x.valuesMapping({})`: yaml 文件键映射跳转到定义配置。查看 [注意事项：关于-YAML-键映射：跳转到定义配置](#注意事项) 中的内容
+- `helm-intellisense-x.valuesMapping({})`: yaml 文件键映射跳转到定义配置。查看 [注意事项：关于-YAML-键映射：跳转到定义配置](#yaml-values-mapping-jumpto) 中的内容
 - `helm-intellisense-x.parseVariablesOfCurrentNamedTemplate(true)`: 是否从当前光标位置向上检索命名模板，当遇到 *define* 时，立即停止。为 false 时会检索至文件开始位置
 - `helm-intellisense-x.separators("")`: [功能未启用]分隔符，为空则使用全局定义。参考 'editor.separators'
 - `helm-intellisense-x.separatorsExclude("")`: [功能未启用]需要排除的分隔符
@@ -50,7 +50,7 @@ VS Code 插件。基于 [Helm-Intellisense](https://github.com/tim-koehler/Helm-
 
 - 默认不绑定 `.yaml` 文件，有需要时建议配合“设置”中的 `files.associations` 来修改特定路径下的 YAML 文件的语言模式
 
-  > 这里强烈推荐使用绝对路径，下面的这种使用方式，很容易造成所有的 yaml 文件都被改变语言模式
+  > 这里强烈推荐使用 **绝对路径**，下面的这种使用方式，很容易造成所有的 yaml 文件都被改变语言模式
 
   ```json
   "files.associations": {
@@ -84,7 +84,7 @@ VS Code 插件。基于 [Helm-Intellisense](https://github.com/tim-koehler/Helm-
   ]
   ```
 
-- 关于 YAML 的“键映射：跳转到定义”配置
+- <span id="yaml-values-mapping-jumpto">关于 YAML 的“键映射：跳转到定义”配置</span>
 
   可以使用键映射，将 YAML 中的第一级键（没有缩进的键，一般为 Map）映射一个别名，在 HELM 模板中使用该别名对其下的子项取值，使用此功能，请确保 `helm-intellisense-x.valuesMappingEnable = true`。
 
