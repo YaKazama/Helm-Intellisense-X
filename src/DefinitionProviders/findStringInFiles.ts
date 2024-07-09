@@ -29,11 +29,13 @@ function isRegExp(value: any): value is RegExp {
   return value instanceof RegExp;
 }
 
-export async function findStringInFiles(fileNames: string[], searchRegexOrString: string | RegExp, offSetPosition: number = 0, concurrencyLimit = 5): Promise<vscode.Location[]> {
+export async function findStringInFiles(fileNames: string[], searchRegexOrString: string | RegExp, startString?: string | undefined, concurrencyLimit = 5): Promise<vscode.Location[]> {
   const results: vscode.Location[] = []
   let running: number = 0
 
   async function processFile() {
+    let flag: boolean = false
+    const startStringRegex: RegExp = new RegExp(`^\\b${startString}\\b:`)
     while (fileNames.length > 0 && running < concurrencyLimit) {
       const fileName: string | undefined = fileNames.shift()
       if (fileName === undefined) { return undefined }
@@ -50,18 +52,19 @@ export async function findStringInFiles(fileNames: string[], searchRegexOrString
       try {
         let totalChars: number = 0
         for await (const [lineIndex, line] of asyncEntries(readLinesAsync(fileName))) {
-          // const index: number = line.indexOf(searchString)
-          // if (index !== -1) {
-          //   const pos = new vscode.Position(lineIndex, index + searchString.length - offSetPosition)
-          //   const location = new vscode.Location(vscode.Uri.file(fileName), pos)
-          //   results.push(location)
-          // }
+          if (startString) {
+            if (!startStringRegex.test(line) && !flag) { continue }
+            flag = true
+          }
           const match: RegExpMatchArray | null = line.match(searchRegex)
           if (match) {
             const c: number = match[1] ? match[1].length : match.index!
             const pos = new vscode.Position(lineIndex, c)
             const location = new vscode.Location(vscode.Uri.file(fileName), pos)
             results.push(location)
+            if (startString) {
+              if (results.length > 0) { break }
+            }
           }
           totalChars += line.length + 1
         }

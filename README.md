@@ -40,6 +40,8 @@ VS Code 插件。基于 [Helm-Intellisense](https://github.com/tim-koehler/Helm-
 - `helm-intellisense-x.variablesCurrentPosition(true)`: 是否从当前光标位置向上检索变量。为 false 时会检索至文件开始位置。当 `variablesCurrentFile = true` 时生效
 - `helm-intellisense-x.valuesCurrentFile(true)`: 是否只在当前文件内全文检索变量。为 false 时会在 chartRootPath 范围内检索所有 .yaml 文件
 - `helm-intellisense-x.valuesCurrentPosition(true)`: 是否从当前光标位置向上检索变量。为 false 时会检索至文件开始位置。当 `valuesCurrentFile = true` 时生效
+- `helm-intellisense-x.valuesMappingEnable(false)`: 是否开启 yaml 文件的“键映射：跳转到定义”功能
+- `helm-intellisense-x.valuesMapping({})`: yaml 文件键映射跳转到定义配置。查看 [注意事项：关于-YAML-键映射：跳转到定义配置](#注意事项) 中的内容
 - `helm-intellisense-x.parseVariablesOfCurrentNamedTemplate(true)`: 是否从当前光标位置向上检索命名模板，当遇到 *define* 时，立即停止。为 false 时会检索至文件开始位置
 - `helm-intellisense-x.separators("")`: [功能未启用]分隔符，为空则使用全局定义。参考 'editor.separators'
 - `helm-intellisense-x.separatorsExclude("")`: [功能未启用]需要排除的分隔符
@@ -81,6 +83,50 @@ VS Code 插件。基于 [Helm-Intellisense](https://github.com/tim-koehler/Helm-
     }
   ]
   ```
+
+- 关于 YAML 的“键映射：跳转到定义”配置
+
+  可以使用键映射，将 YAML 中的第一级键（没有缩进的键，一般为 Map）映射一个别名，在 HELM 模板中使用该别名对其下的子项取值，使用此功能，请确保 `helm-intellisense-x.valuesMappingEnable = true`。
+
+  > 以下例子中，将 `values.yaml` 中的 `example` 映射到 `Context` 中
+
+  - `helm-intellisense-x.valuesMapping` 配置格式
+    - `key`: 需要映射（别名）的键
+    - `path`: 检索时的文件范围，会在列出的文件中查询，为空时使用 `helm-intellisense-x.values`
+
+    ```json
+    {
+      "helm-intellisense-x.valuesMappingEnable": true,
+      "helm-intellisense-x.valuesMapping": {
+        "Context": {
+          "key": "example",
+          "path": [
+            "values.yaml"
+          ]
+        }
+      }
+    }
+    ```
+
+  - `values.yaml` 配置
+
+    ```yaml
+    name: "helm"
+    example:
+      enable: false
+    ```
+
+  - `templates/example.yaml` 使用
+
+    > `.Values.example` 中的 `example` 和 `.Context.enable` 中的 `enable` 可以跳转到 `values.yaml` 中定义的位置
+
+    ```yaml
+    {{- $_ := set . "Context" .Values.example }}
+
+    {{- if .Context.enable }}
+      {{- include "workloads.Deployment" . }}
+    {{- end }}
+    ```
 
 ## 已知问题
 

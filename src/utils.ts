@@ -64,13 +64,14 @@ export function getChartFileFromConfig(chartBasePath: string): string[] {
 }
 
 // 获取需要加载的 yaml 文件。支持 * 号通配符，使用 glob 模块解析
-export function getValueFileNamesFromConfig(chartBasePath: string): string[] {
+export function getValueFileNamesFromConfig(chartBasePath: string, coverFiles?: string[] | undefined): string[] {
   const config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('helm-intellisense-x')
   // helm-intellisense.values 按顺解析的 yaml 文件。注意：valuse.yaml 应该放在第一个位置。默认 ['values.yaml']
-  const valuesFiles: string[] = config.get('values', ['values.yaml'])
+  let valuesFiles: string[] = config.get('values', ['values.yaml'])
   // helm-intellisense.valuesExclude 需要排除的 yaml 文件或目录。默认 ['node_modules/**']
   const excludeFiles: string[] = config.get('valuesExclude', ['node_modules/**'])
   let globFiles: string[] = []
+  if (coverFiles) { valuesFiles = coverFiles }
   for (const filename of valuesFiles) {
     if (!filename.startsWith('/')) {
       globFiles.push(path.join(chartBasePath, filename))
@@ -248,4 +249,13 @@ export function getTransferRange(content: string, lineNumber: number, wordStart:
   const s: number = getWordAtPrev(content, wordStart, str) + 1
   const e: number = getWordAtNext(content, wordEnd, str) - 1
   return new vscode.Range(lineNumber, s, lineNumber, e)
+}
+
+export type valuesMappingInfo = {
+  key: string,
+  path: string[]
+}
+
+export type valuesMapping = {
+  [keyword: string]: valuesMappingInfo
 }

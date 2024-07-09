@@ -148,7 +148,17 @@
           "helm-intellisense-x.valuesCurrentPosition": {
             "type": "boolean",
             "default": true,
-            "definitions": "是否从当前光标位置向上检索变量。为 false 时会检索至文件开始位置。当 valuesCurrentFile = true 时生效"
+            "description": "是否从当前光标位置向上检索变量。为 false 时会检索至文件开始位置。当 valuesCurrentFile = true 时生效"
+          },
+          "helm-intellisense-x.valuesMappingEnable": {
+            "type": "boolean",
+            "default": false,
+            "description": "是否开启 yaml 文件中的键映射"
+          },
+          "helm-intellisense-x.valuesMapping": {
+            "type": "object",
+            "default": {},
+            "description": "yaml 文件键映射配置。示例：{ 'Context': { key: 'key', path: ['values.yaml'] } }"
           },
           "helm-intellisense-x.parseVariablesOfCurrentNamedTemplate": {
             "type": "boolean",

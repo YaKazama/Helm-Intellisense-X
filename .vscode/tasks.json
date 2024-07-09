@@ -7,7 +7,7 @@
             "label": "watch",
             "dependsOn": [
                 "npm: watch:tsc",
-                // "npm: watch:esbuild"
+                "npm: watch:esbuild"
             ],
             "presentation": {
                 "reveal": "never"
@@ -17,18 +17,19 @@
                 "isDefault": true
             }
         },
-        // {
-        //     "type": "npm",
-        //     "script": "watch:esbuild",
-        //     "group": "build",
-        //     "problemMatcher": "$esbuild-watch",
-        //     "isBackground": true,
-        //     "label": "npm: watch:esbuild",
-        //     "presentation": {
-        //         "group": "watch",
-        //         "reveal": "never"
-        //     }
-        // },
+        {
+            "type": "npm",
+            "script": "watch:esbuild",
+            "group": "build",
+            // 这里有个报错，安装 esbuild Problem Matchers 插件后修复
+            "problemMatcher": "$esbuild-watch",
+            "isBackground": true,
+            "label": "npm: watch:esbuild",
+            "presentation": {
+                "group": "watch",
+                "reveal": "never"
+            }
+        },
 		{
             "type": "npm",
             "script": "watch:tsc",

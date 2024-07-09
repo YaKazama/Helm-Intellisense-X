@@ -27,10 +27,9 @@ export class JumpToNamedTemplatesDefinitionProvider implements vscode.Definition
       const tplFiles: string[] = utils.getTemplatesFileFromConfig(chartBasePath)
 
       const searchString = `define "${currentString}"`
-      const offSetPosition: number = currentString.length + 1
 
       try {
-        const locations: vscode.Location[] = await findStringInFiles(tplFiles, searchString, offSetPosition)
+        const locations: vscode.Location[] = await findStringInFiles(tplFiles, searchString)
 
         return locations.length > 0 ? locations : undefined
       } catch (error) {

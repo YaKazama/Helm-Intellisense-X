@@ -49,10 +49,9 @@ export class JumpToVariablesDefinitionProvider implements vscode.DefinitionProvi
         const tplFiles: string[] = utils.getTemplatesFileFromConfig(chartBasePath)
 
         const pattern: RegExp = new RegExp(`\\$\\b${currentString}\\b\\s*:=.*}}`)
-        const offSetPosition: number = currentString.length + 1
 
         try {
-          const locations: vscode.Location[] = await findStringInFiles(tplFiles, pattern, offSetPosition)
+          const locations: vscode.Location[] = await findStringInFiles(tplFiles, pattern)
           return locations.length > 0 ? locations : undefined
         } catch (error) {
           vscode.window.showErrorMessage(`Error finding definition: ${error}`)
