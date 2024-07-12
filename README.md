@@ -68,7 +68,8 @@ VS Code 插件。基于 [Helm-Intellisense](https://github.com/tim-koehler/Helm-
 
   ```json
   "files.associations": {
-    "**/templates/**/*.{yaml,yml}": "helm-template"
+    "**/templates/**/*.{yaml,yml}": "helm-template",
+    "**/templates/**/*.tpl": "helm-template"
   }
   ```
 
@@ -90,9 +91,6 @@ VS Code 插件。基于 [Helm-Intellisense](https://github.com/tim-koehler/Helm-
         ""
       ],
       "firstLine": "^(#\\s+\\bhelm(-template)?\\b|{{-?.*)$",
-      "filenamePatterns": [
-        "**/templates/**/*.tpl"
-      ],
       "configuration": "./language-configuration.json"
     }
   ]
