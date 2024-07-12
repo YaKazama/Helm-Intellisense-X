@@ -23,14 +23,19 @@ VS Code 插件。基于 [Helm-Intellisense](https://github.com/tim-koehler/Helm-
   - 定义的变量
   - 命名模板
   - 锚点
-- `Lint command`：`Helm-Intellisense-x: Lint File`、`Helm-Intellisense-x: Lint Chart`
-  - 无法处理复杂情况
-  - 更改了部分不影响整体逻辑的处理逻辑
-    - 注释处理由原来的分词处理改为按行处理
-  - 只处理有 `.Values` 的行，以下情况会跳过处理
-    - 遇到 if...else、range、with 关键字时
-    - 不包括 `.Values` 的行
-    - 类似这种情况的行 `pluck "lifecycle" . $.Context $.Values`
+
+## Commands
+
+- 无法处理复杂情况
+- 更改了部分不影响整体逻辑的处理逻辑
+  - 注释处理由原来的分词处理改为按行处理
+- 只处理有 `.Values` 的行，以下情况会跳过处理
+  - 遇到 if...else、range、with 关键字时
+  - 不包括 `.Values` 的行
+  - 类似这种情况的行 `pluck "lifecycle" . $.Context $.Values`
+
+`Helm-Intellisense-x: Lint File`: 解析当前活动文档并验证所有路径（如 .Values.foo.bar）是否指向有效值
+`Helm-Intellisense-x: Lint Chart`: 与 `Lint File` 相同，但是针对整个 templates/ 目录下所有的 `.yaml` 和 `.yml` 文件
 
 ## 设置
 
