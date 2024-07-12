@@ -56,7 +56,7 @@ VS Code 插件。基于 [Helm-Intellisense](https://github.com/tim-koehler/Helm-
 - `helm-intellisense-x.valuesMappingEnable(false)`: 是否开启 yaml 文件的“键映射：跳转到定义”功能
 - `helm-intellisense-x.valuesMapping({})`: yaml 文件键映射跳转到定义配置。查看 [注意事项：关于-YAML-键映射：跳转到定义配置](#yaml-values-mapping-jumpto) 中的内容
 - `helm-intellisense-x.parseVariablesOfCurrentNamedTemplate(true)`: 是否从当前光标位置向上检索命名模板，当遇到 *define* 时，立即停止。为 false 时会检索至文件开始位置
-- `helm-intellisense-x.lintExcludeFiles`: 执行 lint 相关命令时，需要从检索列表中移除的文件或目录。支持 glob 解析
+- `helm-intellisense-x.lintExcludeFiles([])`: 执行 lint 相关命令时，需要从检索列表中移除的文件或目录。支持 glob 解析
 - `helm-intellisense-x.separators("")`: [功能未启用]分隔符，为空则使用全局定义。参考 'editor.separators'
 - `helm-intellisense-x.separatorsExclude("")`: [功能未启用]需要排除的分隔符
 
