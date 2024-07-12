@@ -18,7 +18,16 @@
   "activationEvents": [],
   "main": "./dist/extension.js",
   "contributes": {
-    "commands": [],
+    "commands": [
+      {
+        "command": "helm-intellisense-x.Lint",
+        "title": "Helm-Intellisense-x: Lint File"
+      },
+      {
+        "command": "helm-intellisense-x.LintChart",
+        "title": "Helm-Intellisense-x: Lint Chart"
+      }
+    ],
     "languages": [
       {
         "id": "helm-template",
@@ -32,9 +41,6 @@
           ""
         ],
         "firstLine": "^(#\\s+\\bhelm(-template)?\\b|{{-?.*)$",
-        "filenamePatterns": [
-          "**/templates/**/*.tpl"
-        ],
         "icon": {
           "dark": "./icons/helm.svg",
           "light": "./icons/helm.svg"

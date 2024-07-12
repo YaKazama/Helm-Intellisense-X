@@ -15,7 +15,7 @@ export class JumpToValuesDefinitionProvider implements vscode.DefinitionProvider
 
     // 从文件开头往后找，匹配成功则停止
     const config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('helm-intellisense-x')
-    const parseValuesOfCurrentFile: boolean = config.get('valuesCurrentFile', false) // todo
+    const parseValuesOfCurrentFile: boolean = config.get('valuesCurrentFile', true)
     // true 从开头到光标行；false 全文检索
     const parseValuesOfCurrentPosition: boolean = config.get('valuesCurrentPosition', true)
     // .Values.xxx 映射，用于处理 {{- $_ := set . "Context" .Values.Keyword }}

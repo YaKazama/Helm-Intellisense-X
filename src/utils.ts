@@ -5,7 +5,7 @@ import * as path from 'path';
 import { globSync } from 'glob';
 
 // yaml 文件解析
-export function getValuesFromFile(fileName: string, workspaceFolder?: string | undefined) {
+export function getValuesFromFile(fileName: string, workspaceFolder?: string | undefined): yaml.Yaml | undefined {
   const chartBasePath: string | undefined = getChartBasePath(fileName, workspaceFolder)
   if (chartBasePath === undefined) { return undefined }
 
@@ -63,6 +63,18 @@ export function getChartFileFromConfig(chartBasePath: string): string[] {
   return []
 }
 
+export function parseGlobFiles(chartBasePath: string, fileNames: string[], excludeFiles: string[]): string[] {
+  let globFiles: string[] = []
+  for (const filename of fileNames) {
+    if (!filename.startsWith('/')) {
+      globFiles.push(path.join(chartBasePath, filename))
+    } else {
+      globFiles.push(filename)
+    }
+  }
+  return globSync(globFiles, { ignore: excludeFiles, absolute: true })
+}
+
 // 获取需要加载的 yaml 文件。支持 * 号通配符，使用 glob 模块解析
 export function getValueFileNamesFromConfig(chartBasePath: string, coverFiles?: string[] | undefined): string[] {
   const config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('helm-intellisense-x')
@@ -70,35 +82,19 @@ export function getValueFileNamesFromConfig(chartBasePath: string, coverFiles?: 
   let valuesFiles: string[] = config.get('values', ['values.yaml'])
   // helm-intellisense.valuesExclude 需要排除的 yaml 文件或目录。默认 ['node_modules/**']
   const excludeFiles: string[] = config.get('valuesExclude', ['node_modules/**'])
-  let globFiles: string[] = []
-  if (coverFiles) { valuesFiles = coverFiles }
-  for (const filename of valuesFiles) {
-    if (!filename.startsWith('/')) {
-      globFiles.push(path.join(chartBasePath, filename))
-    } else {
-      globFiles.push(filename)
-    }
-  }
 
-  return globSync(globFiles, { ignore: excludeFiles, absolute: true })
+  return parseGlobFiles(chartBasePath, valuesFiles, excludeFiles)
 }
 
+// 获取需要加载的 tpl 文件。支持 * 号通配符，使用 glob 模块解析
 export function getTemplatesFileFromConfig(chartBasePath: string): string[] {
   const config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('helm-intellisense-x')
   // helm-intellisense.templates.external 。默认 ['**/*.tpl']
   const tplFiles: string[] = config.get('templates', ['**/*.tpl'])
   // helm-intellisense-x.templatesExclude 需要从 templates/ 下排除的文件或目录。默认 ['node_modules/**']
   const excludeTplFiles: string[] = config.get('templatesExclude', ['node_modules/**'])
-  let globFiles: string[] = []
-  for (const filename of tplFiles) {
-    if (!filename.startsWith('/')) {
-      globFiles.push(path.join(chartBasePath, filename))
-    } else {
-      globFiles.push(filename)
-    }
-  }
 
-  return globSync(globFiles, { ignore: excludeTplFiles, absolute: true })
+  return parseGlobFiles(chartBasePath, tplFiles, excludeTplFiles)
 }
 
 // 从 *.tpl 文件中解析命名模板（define）和变量定义（$variable := value）。过滤变量定义时，忽略 "$_ := <operator>" 格式

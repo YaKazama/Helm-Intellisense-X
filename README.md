@@ -1,6 +1,6 @@
 # Helm-Intellisense-X
 
-VS Code 插件。基于 [Helm-Intellisense](https://github.com/tim-koehler/Helm-Intellisense) 修改，并移除了 `Lint command`。
+VS Code 插件。基于 [Helm-Intellisense](https://github.com/tim-koehler/Helm-Intellisense) 修改。
 
 ## 功能
 
@@ -23,6 +23,14 @@ VS Code 插件。基于 [Helm-Intellisense](https://github.com/tim-koehler/Helm-
   - 定义的变量
   - 命名模板
   - 锚点
+- `Lint command`：`Helm-Intellisense-x: Lint File`、`Helm-Intellisense-x: Lint Chart`
+  - 无法处理复杂情况
+  - 更改了部分不影响整体逻辑的处理逻辑
+    - 注释处理由原来的分词处理改为按行处理
+  - 只处理有 `.Values` 的行，以下情况会跳过处理
+    - 遇到 if...else、range、with 关键字时
+    - 不包括 `.Values` 的行
+    - 类似这种情况的行 `pluck "lifecycle" . $.Context $.Values`
 
 ## 设置
 
