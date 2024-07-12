@@ -171,6 +171,11 @@
             "default": true,
             "description": "是否从当前光标位置向上检索命名模板，当遇到 define 时，立即停止。为 false 时会检索至文件开始位置"
           },
+          "helm-intellisense-x.lintExcludeFiles": {
+            "type": "array",
+            "default": [],
+            "description": "执行 lint 相关命令时，需要从检索列表中移除的文件或目录。支持 glob 解析"
+          },
           "helm-intellisense-x.separators": {
             "type": "string",
             "default": "",
