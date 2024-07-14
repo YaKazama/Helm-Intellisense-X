@@ -361,9 +361,23 @@
   "HELM: var:curly:k": {
     "prefix": "helm:curly:k:var",
     "body": [
-      "{{- \\$_ := $1 }}$0",
+      "{{- \\$__$1 := $2 }}$0",
     ],
     "description": "代码块 定义变量: {{- var := value }}"
+  },
+  "HELM: curly:set": {
+    "prefix": "helm:curly:set",
+    "body": [
+      "{{- \\$_ := set ${1:.} \"${2:key}\" ${3:value} }}$0",
+    ],
+    "description": "代码块 给字典添加一个键值对: {{- $_ := set dict \"key\" \"value\" ... }}"
+  },
+  "HELM: curly:unset": {
+    "prefix": "helm:curly:unset",
+    "body": [
+      "{{- \\$_ := unset ${1:.} \"${2:key}\" }}$0",
+    ],
+    "description": "代码块 给定一个映射和 key ,从映射中删除这个 key: {{- $_ := unset dict \"key\" }}"
   },
   "HELM: assignment:curly": {
     "prefix": "helm:curly:assignment",
