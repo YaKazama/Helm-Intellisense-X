@@ -359,7 +359,7 @@
     "description": "代码块 定义变量: {{- var := value }}"
   },
   "HELM: var:curly:k": {
-    "prefix": "helm:var:curly:k",
+    "prefix": "helm:curly:k:var",
     "body": [
       "{{- \\$_ := $1 }}$0",
     ],
