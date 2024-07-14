@@ -73,7 +73,11 @@ export class JumpToValuesDefinitionProvider implements vscode.DefinitionProvider
         let keyPattern: RegExp = /^\$?\.Chart\./g
         if (keyPattern.test(transferString)) {
           // Chart.yaml 中的变量，需要首字母转为小写后查询
-          currentString = currentString.charAt(0).toLowerCase() + currentString.slice(1)
+          if (currentString.toLowerCase().indexOf('api') > -1) {
+            currentString = currentString.slice(0, 3).toLowerCase() + currentString.slice(3)
+          } else {
+            currentString = currentString.charAt(0).toLowerCase() + currentString.slice(1)
+          }
           isChart = true
         }
         if (isChart) {

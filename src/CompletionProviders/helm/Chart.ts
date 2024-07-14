@@ -53,7 +53,11 @@ export class ChartCompletionItemProvider implements vscode.CompletionItemProvide
       if (Array.isArray(currentKey[key])) { return undefined }
       result = currentKey[key]
       if (result === undefined) {
-        result = currentKey[key.charAt(0).toLowerCase() + key.slice(1)]
+        if (key.toLowerCase().indexOf('api') > -1) {
+          result = currentKey[key.slice(0, 3).toLowerCase() + key.slice(1)]
+        } else {
+          result = currentKey[key.charAt(0).toLowerCase() + key.slice(1)]
+        }
       }
     }
     return result
@@ -62,7 +66,13 @@ export class ChartCompletionItemProvider implements vscode.CompletionItemProvide
   private getCompletionItemList(currentKey: any, native: boolean = false): vscode.CompletionItem[] {
     const keys: any[] = []
     for (let key in currentKey) {
-      if (!native) { key = key.charAt(0).toUpperCase() + key.slice(1) }
+      if (!native) {
+        if (key.toLowerCase().indexOf('api') > -1) {
+          key = key.slice(0, 3).toUpperCase() + key.slice(3)
+        } else {
+          key = key.charAt(0).toUpperCase() + key.slice(1)
+        }
+      }
       switch (typeof currentKey[key]) {
         case 'object':
           keys.push(new vscode.CompletionItem(key, vscode.CompletionItemKind.Method))
