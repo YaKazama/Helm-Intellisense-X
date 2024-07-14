@@ -12,35 +12,42 @@
     "body": [
       ".Values",
     ],
-    "description": "关键字：.ValuesValues 对象是从 values.yaml 文件和用户提供的文件传进模板的。默认为空"
+    "description": "关键字：.Values\nValues 对象是从 values.yaml 文件和用户提供的文件传进模板的。默认为空"
   },
   "HELM: Chart": {
     "prefix": "helm:k:Chart",
     "body": [
       ".Chart",
     ],
-    "description": "Chart.yaml 文件内容。 Chart.yaml 里的所有数据在这里都可以可访问的"
+    "description": "关键字：.Chart\nValues 对象是 Chart.yaml 文件内容。Chart.yaml 里的所有数据在这里都可以可访问的"
   },
   "HELM: Chart.APIVersion": {
     "prefix": "helm:k:Chart.APIVersion",
     "body": [
       ".Chart.APIVersion",
     ],
-    "description": "Chart.yaml 文件内容: APIVersion"
+    "description": "Chart.yaml 文件内容: apiVersion"
   },
   "HELM: Chart.Name": {
     "prefix": "helm:k:Chart.Name",
     "body": [
       ".Chart.Name",
     ],
-    "description": "Chart.yaml 文件内容: Name"
+    "description": "Chart.yaml 文件内容: name"
   },
   "HELM: Chart.Version": {
     "prefix": "helm:k:Chart.Version",
     "body": [
       ".Chart.Version",
     ],
-    "description": "Chart.yaml 文件内容: Version"
+    "description": "Chart.yaml 文件内容: version"
+  },
+  "HELM: Chart.AppVersion": {
+    "prefix": "helm:k:Chart.AppVersion",
+    "body": [
+      ".Chart.AppVersion",
+    ],
+    "description": "Chart.yaml 文件内容: appVersion"
   },
   "HELM: Release": {
     "prefix": "helm:k:Release",
@@ -387,6 +394,13 @@
       "{{- /*",
       "  $1",
       "*/ -}}$0"
+    ],
+    "description": "块注释"
+  },
+  "HELM: notation:oneline:curly": {
+    "prefix": "helm:curly:notationOneLine",
+    "body": [
+      "{{- /*  $1 */ -}}$0"
     ],
     "description": "块注释"
   },
