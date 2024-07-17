@@ -1,267 +1,329 @@
 {
-  // keywords
   "HELM: Context": {
-    "prefix": "helm:k:Context",
+    "prefix": "helm:Context",
     "body": [
       ".Context",
     ],
     "description": "关键字: .Context"
   },
   "HELM: Values": {
-    "prefix": "helm:k:Values",
+    "prefix": "helm:Values",
     "body": [
       ".Values",
     ],
-    "description": "关键字：.Values\nValues 对象是从 values.yaml 文件和用户提供的文件传进模板的。默认为空"
+    "description": "关键字：.Values"
   },
   "HELM: Chart": {
-    "prefix": "helm:k:Chart",
+    "prefix": "helm:Chart",
     "body": [
       ".Chart",
     ],
-    "description": "关键字：.Chart\nValues 对象是 Chart.yaml 文件内容。Chart.yaml 里的所有数据在这里都可以可访问的"
+    "description": "关键字：.Chart"
   },
   "HELM: Chart.APIVersion": {
-    "prefix": "helm:k:Chart.APIVersion",
+    "prefix": "helm:Chart.APIVersion",
     "body": [
       ".Chart.APIVersion",
     ],
-    "description": "Chart.yaml 文件内容: apiVersion"
+    "description": "chart API 版本 （必需）"
   },
   "HELM: Chart.Name": {
-    "prefix": "helm:k:Chart.Name",
+    "prefix": "helm:Chart.Name",
     "body": [
       ".Chart.Name",
     ],
-    "description": "Chart.yaml 文件内容: name"
+    "description": "chart名称 （必需）"
   },
   "HELM: Chart.Version": {
-    "prefix": "helm:k:Chart.Version",
+    "prefix": "helm:Chart.Version",
     "body": [
       ".Chart.Version",
     ],
-    "description": "Chart.yaml 文件内容: version"
+    "description": "语义化2 版本 （必需）"
+  },
+  "HELM: Chart.KubeVersion": {
+    "prefix": "helm:Chart.KubeVersion",
+    "body": [
+      ".Chart.KubeVersion",
+    ],
+    "description": "兼容Kubernetes版本的语义化版本 （可选）"
+  },
+  "HELM: Chart.Description": {
+    "prefix": "helm:Chart.Description",
+    "body": [
+      ".Chart.Description",
+    ],
+    "description": "description一句话对这个项目的描述 （可选）"
+  },
+  "HELM: Chart.Type": {
+    "prefix": "helm:Chart.Type",
+    "body": [
+      ".Chart.Type",
+    ],
+    "description": "chart类型 （可选）"
+  },
+  "HELM: Chart.Keywords": {
+    "prefix": "helm:Chart.Keywords",
+    "body": [
+      ".Chart.Keywords",
+    ],
+    "description": "关于项目的一组关键字 （可选）"
+  },
+  "HELM: Chart.Home": {
+    "prefix": "helm:Chart.Home",
+    "body": [
+      ".Chart.Home",
+    ],
+    "description": "项目home页面的URL （可选）"
+  },
+  "HELM: Chart.Dependencies": {
+    "prefix": "helm:Chart.Dependencies",
+    "body": [
+      ".Chart.Dependencies",
+    ],
+    "description": "chart 必要条件列表 （可选）"
+  },
+  "HELM: Chart.Maintainers": {
+    "prefix": "helm:Chart.Maintainers",
+    "body": [
+      ".Chart.Maintainers",
+    ],
+    "description": "维护者列表 （可选）"
+  },
+  "HELM: Chart.Icon": {
+    "prefix": "helm:Chart.Icon",
+    "body": [
+      ".Chart.Icon",
+    ],
+    "description": "用做icon的SVG或PNG图片URL （可选）"
   },
   "HELM: Chart.AppVersion": {
-    "prefix": "helm:k:Chart.AppVersion",
+    "prefix": "helm:Chart.AppVersion",
     "body": [
       ".Chart.AppVersion",
     ],
-    "description": "Chart.yaml 文件内容: appVersion"
+    "description": "包含的应用版本 （可选）。不需要是语义化，建议使用引号"
+  },
+  "HELM: Chart.Deprecated": {
+    "prefix": "helm:Chart.Deprecated",
+    "body": [
+      ".Chart.Deprecated",
+    ],
+    "description": "不被推荐的chart （可选，布尔值）"
+  },
+  "HELM: Chart.Annotations": {
+    "prefix": "helm:Chart.Annotations",
+    "body": [
+      ".Chart.Annotations",
+    ],
+    "description": "注释 （可选）"
   },
   "HELM: Release": {
-    "prefix": "helm:k:Release",
+    "prefix": "helm:Release",
     "body": [
       ".Release",
     ],
     "description": "Release 对象描述了版本发布本身"
   },
   "HELM: Release.Name": {
-    "prefix": "helm:k:Release.Name",
+    "prefix": "helm:Release.Name",
     "body": [
       ".Release.Name",
     ],
-    "description": "release 名称"
+    "description": "release名称。版本名称(非chart的)"
   },
   "HELM: Release.Namespace": {
-    "prefix": "helm:k:Release.Namespace",
+    "prefix": "helm:Release.Namespace",
     "body": [
       ".Release.Namespace",
     ],
-    "description": "版本中包含的命名空间 (如果 manifest 没有覆盖的话)"
+    "description": "发布的chart版本的命名空间。版本中包含的命名空间(如果manifest没有覆盖的话)"
   },
   "HELM: Release.IsUpgrade": {
-    "prefix": "helm:k:Release.IsUpgrade",
+    "prefix": "helm:Release.IsUpgrade",
     "body": [
       ".Release.IsUpgrade",
     ],
     "description": "如果当前操作是升级或回滚的话，该值将被设置为 true"
   },
   "HELM: Release.IsInstall": {
-    "prefix": "helm:k:Release.IsInstall",
+    "prefix": "helm:Release.IsInstall",
     "body": [
       ".Release.IsInstall",
     ],
     "description": "如果当前操作是安装的话，该值将被设置为 true"
   },
   "HELM: Release.Revision": {
-    "prefix": "helm:k:Release.Revision",
+    "prefix": "helm:Release.Revision",
     "body": [
       ".Release.Revision",
     ],
     "description": "此次修订的版本号。安装时是 1 ，每次升级或回滚都会自增"
   },
   "HELM: Release.Service": {
-    "prefix": "helm:k:Release.Service",
+    "prefix": "helm:Release.Service",
     "body": [
       ".Release.Service",
     ],
-    "description": "该 service 用来渲染当前模板。Helm 里始终 Helm"
+    "description": "该service用来渲染当前模板。Helm 里始终 Helm"
   },
   "HELM: Files": {
-    "prefix": "helm:k:Files",
+    "prefix": "helm:Files",
     "body": [
       ".Files",
     ],
     "description": "在 chart 中提供访问所有的非特殊文件的对象。你不能使用它访问 Template 对象，只能访问其他文件"
   },
   "HELM: Files.Get": {
-    "prefix": "helm:k:Files.Get",
+    "prefix": "helm:Files.Get",
     "body": [
       ".Files.Get",
     ],
     "description": "过文件名获取文件的方法"
   },
   "HELM: Files.GetBytes": {
-    "prefix": "helm:k:Files.GetBytes",
+    "prefix": "helm:Files.GetBytes",
     "body": [
       ".Files.GetBytes",
     ],
     "description": "用字节数组代替字符串获取文件内容的方法。 对图片之类的文件很有用"
   },
   "HELM: Files.Glob": {
-    "prefix": "helm:k:Files.Glob",
+    "prefix": "helm:Files.Glob",
     "body": [
       ".Files.Glob",
     ],
     "description": "用给定的 shell glob 模式匹配文件名返回文件列表的方法"
   },
   "HELM: Files.Lines": {
-    "prefix": "helm:k:Files.Lines",
+    "prefix": "helm:Files.Lines",
     "body": [
       ".Files.Lines",
     ],
     "description": "逐行读取文件内容的方法。迭代文件中每一行时很有用"
   },
   "HELM: Files.AsSecrets": {
-    "prefix": "helm:k:Files.AsSecrets",
+    "prefix": "helm:Files.AsSecrets",
     "body": [
       ".Files.AsSecrets",
     ],
     "description": "使用 Base 64 编码字符串返回文件体的方法"
   },
   "HELM: Files.AsConfig": {
-    "prefix": "helm:k:Files.AsConfig",
+    "prefix": "helm:Files.AsConfig",
     "body": [
       ".Files.AsConfig",
     ],
     "description": "使用 YAML 格式返回文件体的方法"
   },
   "HELM: Capabilities": {
-    "prefix": "helm:k:Capabilities",
+    "prefix": "helm:Capabilities",
     "body": [
       ".Capabilities",
     ],
     "description": "提供关于 Kubernetes 集群支持功能的信息"
   },
   "HELM: Capabilities.APIVersions": {
-    "prefix": "helm:k:Capabilities.APIVersions",
+    "prefix": "helm:Capabilities.APIVersions",
     "body": [
       ".Capabilities.APIVersions",
     ],
     "description": "是一个版本列表"
   },
   "HELM: Capabilities.APIVersions.Has": {
-    "prefix": "helm:k:Capabilities.APIVersions.Has",
+    "prefix": "helm:Capabilities.APIVersions.Has",
     "body": [
       ".Capabilities.APIVersions.Has \"${1:resource}\"$0",
     ],
     "description": "说明集群中的版本 (比如, batch/v1) 或是资源 (比如, apps/v1/Deployment) 是否可用"
   },
   "HELM: Capabilities.KubeVersion": {
-    "prefix": "helm:k:Capabilities.KubeVersion",
+    "prefix": "helm:Capabilities.KubeVersion",
     "body": [
       ".Capabilities.KubeVersion",
     ],
     "description": "Kubernetes 的版本号"
   },
   "HELM: Capabilities.KubeVersion.Version": {
-    "prefix": "helm:k:Capabilities.KubeVersion.Version",
+    "prefix": "helm:Capabilities.KubeVersion.Version",
     "body": [
       ".Capabilities.KubeVersion.Version",
     ],
     "description": "Kubernetes 的版本号"
   },
   "HELM: Capabilities.KubeVersion.Major": {
-    "prefix": "helm:k:Capabilities.KubeVersion.Major",
+    "prefix": "helm:Capabilities.KubeVersion.Major",
     "body": [
       ".Capabilities.KubeVersion.Major",
     ],
     "description": "Kubernetes 的主版本"
   },
   "HELM: Capabilities.KubeVersion.Minor": {
-    "prefix": "helm:k:Capabilities.KubeVersion.Minor",
+    "prefix": "helm:Capabilities.KubeVersion.Minor",
     "body": [
       ".Capabilities.KubeVersion.Minor",
     ],
     "description": "Kubernetes 的次版本"
   },
   "HELM: Capabilities.HelmVersion": {
-    "prefix": "helm:k:Capabilities.HelmVersion",
+    "prefix": "helm:Capabilities.HelmVersion",
     "body": [
       ".Capabilities.HelmVersion",
     ],
     "description": "包含 Helm 版本详细信息的对象，和 helm version 的输出一致"
   },
   "HELM: Capabilities.HelmVersion.Version": {
-    "prefix": "helm:k:Capabilities.HelmVersion.Version",
+    "prefix": "helm:Capabilities.HelmVersion.Version",
     "body": [
       ".Capabilities.HelmVersion.Version",
     ],
     "description": "是当前 Helm 语义格式的版本"
   },
   "HELM: Capabilities.HelmVersion.GitCommit": {
-    "prefix": "helm:k:Capabilities.HelmVersion.GitCommit",
+    "prefix": "helm:Capabilities.HelmVersion.GitCommit",
     "body": [
       ".Capabilities.HelmVersion.GitCommit",
     ],
     "description": "Helm 的 git sha1 值"
   },
   "HELM: Capabilities.HelmVersion.GitTreeState": {
-    "prefix": "helm:k:Capabilities.HelmVersion.GitTreeState",
+    "prefix": "helm:Capabilities.HelmVersion.GitTreeState",
     "body": [
       ".Capabilities.HelmVersion.GitTreeState",
     ],
     "description": "是 Helm git 树的状态"
   },
   "HELM: Capabilities.HelmVersion.GoVersion": {
-    "prefix": "helm:k:Capabilities.HelmVersion.GoVersion",
+    "prefix": "helm:Capabilities.HelmVersion.GoVersion",
     "body": [
       ".Capabilities.HelmVersion.GoVersion",
     ],
     "description": "是使用的 Go 编译器版本"
   },
   "HELM: Template": {
-    "prefix": "helm:k:Template",
+    "prefix": "helm:Template",
     "body": [
       ".Template",
     ],
     "description": "包含当前被执行的当前模板信息"
   },
   "HELM: Template.Name": {
-    "prefix": "helm:k:Template.Name",
+    "prefix": "helm:Template.Name",
     "body": [
       ".Template.Name",
     ],
     "description": "当前模板的命名空间文件路径 (e.g. mychart/templates/mytemplate.yaml)"
   },
   "HELM: Template.BasePath": {
-    "prefix": "helm:k:Template.BasePath",
+    "prefix": "helm:Template.BasePath",
     "body": [
       ".Template.BasePath",
     ],
     "description": "当前 chart 模板目录的路径 (e.g. mychart/templates)"
   },
-  "HELM: include": {
-    "prefix": "helm:k:include",
-    "body": [
-      "include \"$1\" $2$0",
-    ],
-    "description": "关键字: include。引用命名模板"
-  },
-  // curly
-  "HELM: if:curly": {
-    "prefix": "helm:curly:if",
+  // braces
+  "HELM: if:braces": {
+    "prefix": "helm:braces:if",
     "body": [
       "{{- if $1 }}",
       "  $2",
@@ -269,8 +331,8 @@
     ],
     "description": "创建条件语句: if ... end"
   },
-  "HELM: if-else:curly": {
-    "prefix": "helm:curly:if-else",
+  "HELM: if-else:braces": {
+    "prefix": "helm:braces:if-else",
     "body": [
       "{{- if $1 }}",
       "  $2",
@@ -280,24 +342,24 @@
     ],
     "description": "创建条件语句: if ... else ... end"
   },
-  "HELM: else:curly": {
-    "prefix": "helm:curly:else",
+  "HELM: else:braces": {
+    "prefix": "helm:braces:else",
     "body": [
       "{{- else }}",
       "  $0"
     ],
     "description": "创建条件语句: else"
   },
-  "HELM: else-if:curly": {
-    "prefix": "helm:curly:else-if",
+  "HELM: else-if:braces": {
+    "prefix": "helm:braces:else-if",
     "body": [
       "{{- else if $1 }}",
       "  $0",
     ],
     "description": "创建条件语句: else if"
   },
-  "HELM: with:curly": {
-    "prefix": "helm:curly:with",
+  "HELM: with:braces": {
+    "prefix": "helm:braces:with",
     "body": [
       "{{- with ${1:.} }}",
       "  $2",
@@ -305,89 +367,89 @@
     ],
     "description": "用来指定范围"
   },
-  "HELM: range:curly:dict": {
-    "prefix": "helm:range:curly:dict",
+  "HELM: braces:range:dict": {
+    "prefix": "helm:braces:range:dict",
     "body": [
       "{{- range $1 := $2 }}",
       "  $3",
       "{{- end }}$0"
     ],
-    "description": "提供 \"for each\" 类型的循环"
+    "description": "为 Map 提供 \"for each\" 类型的循环"
   },
-  "HELM: range:curly:list": {
-    "prefix": "helm:range:curly:list",
+  "HELM: braces:range:list:slice": {
+    "prefix": "helm:braces:range:list:slice",
     "body": [
       "{{- range $1 }}",
       "  $3",
       "{{- end }}$0"
     ],
-    "description": "提供 \"for each\" 类型的循环"
+    "description": "为 Slice 提供 \"for each\" 类型的循环"
   },
-  "HELM: curly:noHyphen": {
-    "prefix": "helm:curly:print",
+  "HELM: braces:noHyphen": {
+    "prefix": "helm:braces:print",
     "body": [
       "{{ $1 }}$0",
     ],
     "description": "{{ variable }}"
   },
-  "HELM: curly:leftHyphen": {
-    "prefix": "helm:curly:leftHyphen",
+  "HELM: braces:leftHyphen": {
+    "prefix": "helm:braces:leftHyphen",
     "body": [
       "{{- $2 }}$0",
     ],
     "description": "HELM: {{- .Arg }}"
   },
-  "HELM: tab:curly": {
-    "prefix": "helm:curly:tab",
+  "HELM: tab:braces": {
+    "prefix": "helm:braces:tab",
     "body": [
       "{{- indent ${1:0} \"\" -}}$0",
     ],
     "description": "代码块 缩进 (不换行): {{- indent 0 \"\" -}}"
   },
-  "HELM: tabn:curly": {
-    "prefix": "helm:curly:tabn",
+  "HELM: tabn:braces": {
+    "prefix": "helm:braces:tabn",
     "body": [
       "{{- nindent ${1:0} \"\" -}}$0",
     ],
     "description": "代码块 缩进 (换行): {{- nindent 0 \"\" -}}"
   },
-  "HELM: var:curly": {
-    "prefix": "helm:curly:var",
+  "HELM: var:braces": {
+    "prefix": "helm:braces:var",
     "body": [
       "{{- $1 := $2 }}$0",
     ],
     "description": "代码块 定义变量: {{- var := value }}"
   },
-  "HELM: var:curly:k": {
-    "prefix": "helm:curly:k:var",
+  "HELM: var:braces:k": {
+    "prefix": "helm:braces:varDollar",
     "body": [
       "{{- \\$__$1 := $2 }}$0",
     ],
     "description": "代码块 定义变量: {{- var := value }}"
   },
-  "HELM: curly:set": {
-    "prefix": "helm:curly:set",
+  "HELM: braces:set": {
+    "prefix": "helm:braces:set",
     "body": [
       "{{- \\$_ := set ${1:.} \"${2:key}\" ${3:value} }}$0",
     ],
     "description": "代码块 给字典添加一个键值对: {{- $_ := set dict \"key\" \"value\" ... }}"
   },
-  "HELM: curly:unset": {
-    "prefix": "helm:curly:unset",
+  "HELM: braces:unset": {
+    "prefix": "helm:braces:unset",
     "body": [
       "{{- \\$_ := unset ${1:.} \"${2:key}\" }}$0",
     ],
     "description": "代码块 给定一个映射和 key ,从映射中删除这个 key: {{- $_ := unset dict \"key\" }}"
   },
-  "HELM: assignment:curly": {
-    "prefix": "helm:curly:assignment",
+  "HELM: assignment:braces": {
+    "prefix": "helm:braces:assignment",
     "body": [
       "{{- $1 = $2 }}$0",
     ],
     "description": "代码块 变量赋值: {{- var = value }}"
   },
-  "HELM: define:curly": {
-    "prefix": "helm:curly:define",
+  "HELM: define:braces": {
+    "prefix": "helm:braces:define",
     "body": [
       "{{- define \"$1\" -}}",
       "  $2",
@@ -395,15 +457,15 @@
     ],
     "description": "在模板中声明一个新的命名模板"
   },
-  "HELM: include:curly": {
-    "prefix": "helm:curly:include",
+  "HELM: include:braces": {
+    "prefix": "helm:braces:include",
     "body": [
       "{{- include \"$1\" $2 }}$0",
     ],
     "description": "引用命名模板"
   },
-  "HELM: notation:curly": {
-    "prefix": "helm:curly:notation",
+  "HELM: notation:braces": {
+    "prefix": "helm:braces:notation",
     "body": [
       "{{- /*",
       "  $1",
@@ -411,50 +473,27 @@
     ],
     "description": "块注释"
   },
-  "HELM: notation:oneline:curly": {
-    "prefix": "helm:curly:notationOneLine",
+  "HELM: notation:oneline:braces": {
+    "prefix": "helm:braces:notationOneLine",
     "body": [
       "{{- /*  $1 */ -}}$0"
     ],
     "description": "块注释"
   },
   "HELM: end": {
-    "prefix": "helm:curly:end",
+    "prefix": "helm:braces:end",
     "body": [
       "{{- end }}$0",
     ],
     "description": "代码块 end: {{- end }}"
   },
-  "HELM: fail:curly": {
-    "prefix": "helm:curly:fail",
+  "HELM: fail:braces": {
+    "prefix": "helm:braces:fail",
     "body": [
       "{{- fail \"$1\" }}$0",
     ],
     "description": "代码块 fail: {{- fail \"<string>\" }}"
   },
-  // notation
-  "HELM: notation-variables": {
-    "prefix": "helm:notation:variables",
-    "body": [
-      "variables (${1:priority}): $0",
-    ],
-    "description": "自定义关键字: variables (priority)"
-  },
-  "HELM: notation-reference": {
-    "prefix": "helm:notation:reference",
-    "body": [
-      "reference: $0",
-    ],
-    "description": "自定义关键字: reference"
-  },
-  "HELM: notation-descr": {
-    "prefix": "helm:notation:descr",
-    "body": [
-      "descr: $0",
-    ],
-    "description": "自定义关键字: descr"
-  },
-  // logic
   "HELM: and": {
     "prefix": "helm:logic:and",
     "body": [
@@ -521,7 +560,7 @@
   "HELM: defalut": {
     "prefix": "helm:logic:default",
     "body": [
-      "default \"${1:defaultValue}\" ${1:value}$0"
+      "default \"${2:defaultValue}\" ${1:value}$0"
     ],
     "description": "使用 default 设置一个简单的默认值"
   },
@@ -549,11 +588,10 @@
   "HELM: ternary": {
     "prefix": "helm:logic:ternary",
     "body": [
-      "ternary \"${1:trueValue}\" \"${2:falseValue}\" ${0:true} ",
+      "ternary ${2:trueValue} ${3:falseValue} ${1:testValue}$0",
     ],
     "description": "ternary 函数获取两个值和一个 test 值。如果test 值是 true ，则返回第一个值。如果 test 值是空，则返回第二个值。 这和C或其他编程语言中的的ternary运算符类似"
   },
-  // str
   "HELM: print": {
     "prefix": "helm:str:print",
     "body": [
@@ -578,105 +616,105 @@
   "HELM: trim": {
     "prefix": "helm:str:trim",
     "body": [
-      "trim$0",
+      "trim ${1:value}$0",
     ],
     "description": "trim 行数移除字符串两边的空格"
   },
   "HELM: trimAll": {
     "prefix": "helm:str:trimAll",
     "body": [
-      "trimAll \"${1:trimString}\" \"${2:string}\"$0",
+      "trimAll \"${2:trimString}\" ${1:value}$0",
     ],
     "description": "从字符串中移除给定的字符"
   },
   "HELM: trimPrefix": {
     "prefix": "helm:str:trimPrefix",
     "body": [
-      "trimPrefix \"${1:trimString}\" \"${2:string}\"$0",
+      "trimPrefix \"${2:trimString}\" ${1:value}$0",
     ],
     "description": "从字符串中移除前缀"
   },
   "HELM: trimSuffix": {
     "prefix": "helm:str:trimSuffix",
     "body": [
-      "trimSuffix \"${1:trimString}\" \"${2:string}\"$0",
+      "trimSuffix \"${2:trimString}\" ${1:value}$0",
     ],
     "description": "从字符串中移除后缀"
   },
   "HELM: lower": {
     "prefix": "helm:str:lower",
     "body": [
-      "lower \"${1:string}\"$0",
+      "lower ${1:value}$0",
     ],
     "description": "将整个字符串转换成小写"
   },
   "HELM: upper": {
     "prefix": "helm:str:upper",
     "body": [
-      "upper \"${1:string}\"$0",
+      "upper ${1:value}$0",
     ],
     "description": "将整个字符串转换成大写"
   },
   "HELM: title": {
     "prefix": "helm:str:title",
     "body": [
-      "title \"${1:string}\"$0",
+      "title ${1:value}$0",
     ],
     "description": "首字母转换成大写"
   },
   "HELM: untitle": {
     "prefix": "helm:str:untitle",
     "body": [
-      "untitle \"${1:string}\"$0",
+      "untitle ${1:value}$0",
     ],
     "description": "移除首字母大写"
   },
   "HELM: repeat": {
     "prefix": "helm:str:repeat",
     "body": [
-      "repeat ${1:int} \"${2:string}\"$0",
+      "repeat ${2:int} ${1:value}$0",
     ],
     "description": "重复字符串多次"
   },
   "HELM: substr": {
     "prefix": "helm:str:substr",
     "body": [
-      "substr ${1:intStart} ${2:intEnd} \"${3:string}\"$0",
+      "substr ${2:intStart} ${3:intEnd} ${1:value}$0",
     ],
     "description": "获取字符串的子串"
   },
   "HELM: nospace": {
     "prefix": "helm:str:nospace",
     "body": [
-      "nospace \"${1:string}\"$0",
+      "nospace ${1:value}$0",
     ],
     "description": "去掉字符串中的所有空格"
   },
   "HELM: trunc": {
     "prefix": "helm:str:trunc",
     "body": [
-      "trunc ${1:intStart} \"${2:string}\"$0",
+      "trunc ${2:intStart} ${1:value}$0",
     ],
     "description": "截断字符串"
   },
   "HELM: abbrev": {
     "prefix": "helm:str:abbrev",
     "body": [
-      "abbrev ${1:maxLength} \"${2:string}\"$0",
+      "abbrev ${2:maxLength} ${1:value}$0",
     ],
     "description": "用省略号截断字符串 (...)"
   },
   "HELM: abbrevboth": {
     "prefix": "helm:str:abbrevboth",
     "body": [
-      "abbrevboth ${1:intOffset} ${2:maxLength} \"${3:string}\"$0",
+      "abbrevboth ${2:intOffset} ${3:maxLength} ${1:value}$0",
     ],
-    "description": "两边都省略"
+    "description": "两边都省略。三个参数分别为：左侧偏移值，最大长度，字符串"
   },
   "HELM: initials": {
     "prefix": "helm:str:initials",
     "body": [
-      "initials \"${1:string}\"$0",
+      "initials ${1:value}$0",
     ],
     "description": "截取给定字符串每个单词的首字母，并组合在一起"
   },
@@ -711,49 +749,49 @@
   "HELM: wrap": {
     "prefix": "helm:str:wrap",
     "body": [
-      "wrap ${1:80} $0",
+      "wrap ${2:80} ${1:value}$0",
     ],
     "description": "以给定列数给文字换行"
   },
   "HELM: wrapWith": {
     "prefix": "helm:str:wrapWith",
     "body": [
-      "wrapWith ${1:int} \"${2:EOL}\" \"${3:string}\"$0",
+      "wrapWith ${2:int} \"${3:EOL}\" ${1:value}$0",
     ],
     "description": "wrapWith 和 wrap 类似，但可以以指定字符串换行。(wrap 使用的是 \\n)"
   },
   "HELM: contains": {
     "prefix": "helm:str:contains",
     "body": [
-      "contains \"${1:string}\" \"${2:string}\"$0",
+      "contains \"${2:string}\" ${1:value}$0",
     ],
     "description": "测试字符串是否包含在另一个字符串中"
   },
   "HELM: hasPrefix": {
     "prefix": "helm:str:hasPrefix",
     "body": [
-      "hasPrefix \"${1:string}\" \"${2:string}\"$0",
+      "hasPrefix \"${1:string}\" ${1:value}$0",
     ],
     "description": "测试字符串是否有给定的前缀"
   },
   "HELM: hasSuffix": {
     "prefix": "helm:str:hasSuffix",
     "body": [
-      "hasSuffix \"${1:string}\" \"${2:string}\"$0",
+      "hasSuffix \"${1:string}\" ${1:value}$0",
     ],
     "description": "测试字符串是否有给定的后缀"
   },
   "HELM: quote": {
     "prefix": "helm:str:quote",
     "body": [
-      "quote $0",
+      "quote ${1:value}$0",
     ],
     "description": "该函数将字符串用双引号 (quote) 括起来"
   },
   "HELM: squote": {
     "prefix": "helm:str:squote",
     "body": [
-      "squote $0",
+      "squote ${1:value}$0",
     ],
     "description": "该函数将字符串用单引号 (squote) 括起来"
   },
@@ -767,283 +805,280 @@
   "HELM: indent": {
     "prefix": "helm:str:indent",
     "body": [
-      "indent ${1:0}$0",
+      "indent ${2:0} ${1:value}$0",
     ],
     "description": "indent 以指定长度缩进给定字符串所在行，在对齐多行字符串时很有用"
   },
   "HELM: nindent": {
     "prefix": "helm:str:nindent",
     "body": [
-      "nindent ${1:0}$0",
+      "nindent ${2:0} ${1:value}$0",
     ],
     "description": "nindent 函数和 indent 函数一样，但可以在字符串开头添加新行"
   },
   "HELM: replace": {
     "prefix": "helm:str:replace",
     "body": [
-      "replace \"${1: }\" \"$2\"$0",
+      "replace \"${2: }\" \"$3\" ${1:value}$0",
     ],
     "description": "执行简单的字符串替换"
   },
   "HELM: plural": {
     "prefix": "helm:str:plural",
     "body": [
-      "plural \"${1:singular}\" \"${2:plural}\" $3$0",
+      "plural ${1:singular} ${2:plural} ${3:length}$0",
     ],
     "description": "字符串复数化"
   },
   "HELM: snakecase": {
     "prefix": "helm:str:snakecase",
     "body": [
-      "snakecase \"$1\"$0",
+      "snakecase ${1:value}$0",
     ],
     "description": "将驼峰写法转换成蛇形写法"
   },
   "HELM: camelcase": {
     "prefix": "helm:str:camelcase",
     "body": [
-      "camelcase \"$1\"$0",
+      "camelcase ${1:value}$0",
     ],
     "description": "将字符串从蛇形写法转换成驼峰写法"
   },
   "HELM: kebabcase": {
     "prefix": "helm:str:kebabcase",
     "body": [
-      "kebabcase \"$1\"$0",
+      "kebabcase ${1:value}$0",
     ],
     "description": "将驼峰写法转换成烤串写法"
   },
   "HELM: swapcase": {
     "prefix": "helm:str:swapcase",
     "body": [
-      "swapcase \"$1\"$0",
+      "swapcase ${1:value}$0",
     ],
     "description": "基于单词的算法切换字符串的大小写"
   },
   "HELM: shuffle": {
     "prefix": "helm:str:shuffle",
     "body": [
-      "shuffle \"$1\"$0",
+      "shuffle ${1:value}$0",
     ],
     "description": "对字符串进行洗牌"
   },
-  // type
   "HELM: atoi": {
     "prefix": "helm:type:atoi",
     "body": [
-      "atoi \"${1:string}\" $0",
+      "atoi ${1:value} $0",
     ],
     "description": "字符串转换成整型"
   },
   "HELM: float64": {
     "prefix": "helm:type:float64",
     "body": [
-      "float64$0",
+      "float64 ${1:value}$0",
     ],
     "description": "转换成 float64"
   },
   "HELM: int": {
     "prefix": "helm:type:int",
     "body": [
-      "int$0",
+      "int ${1:value}$0",
     ],
     "description": "按系统整型宽度转换成 int"
   },
   "HELM: int64": {
     "prefix": "helm:type:int64",
     "body": [
-      "int64$0",
+      "int64 ${1:value}$0",
     ],
     "description": "转换成 int64"
   },
   "HELM: toDecimal": {
     "prefix": "helm:type:toDecimal",
     "body": [
-      "toDecimal$0",
+      "toDecimal ${1:value}$0",
     ],
     "description": "将 unix 八进制转换成 int64 。给定一个 unix 八进制权限，转换成十进制"
   },
   "HELM: toString": {
     "prefix": "helm:type:toString",
     "body": [
-      "toString$0",
+      "toString ${1:value}$0",
     ],
     "description": "转换成字符串"
   },
   "HELM: toStrings": {
     "prefix": "helm:type:toStrings",
     "body": [
-      "toStrings$0",
+      "toStrings ${1:value}$0",
     ],
     "description": "将列表、切片或数组转换成字符串列表。给定一个类列表集合，输出字符串切片"
   },
   "HELM: toJson": {
     "prefix": "helm:type:toJson",
     "body": [
-      "toJson$0",
+      "toJson ${1:value}$0",
     ],
     "description": "HELM: 将列表、切片、数组、字典或对象转换成JSON"
   },
   "HELM: mustToJson": {
     "prefix": "helm:type:mustToJson",
     "body": [
-      "mustToJson$0",
+      "mustToJson ${1:value}$0",
     ],
     "description": "将列表、切片、数组、字典或对象转换成 JSON"
   },
   "HELM: toPrettyJson": {
     "prefix": "helm:type:toPrettyJson",
     "body": [
-      "toPrettyJson$0",
+      "toPrettyJson ${1:value}$0",
     ],
     "description": "将列表、切片、数组、字典或对象转换成格式化 JSON"
   },
   "HELM: mustToPrettyJson": {
     "prefix": "helm:type:mustToPrettyJson",
     "body": [
-      "mustToPrettyJson$0",
+      "mustToPrettyJson ${1:value}$0",
     ],
     "description": "将列表、切片、数组、字典或对象转换成格式化 JSON"
   },
   "HELM: toRawJson": {
     "prefix": "helm:type:toRawJson",
     "body": [
-      "toRawJson$0",
+      "toRawJson ${1:value}$0",
     ],
     "description": "将列表、切片、数组、字典或对象转换成HTML字符未转义的 JSON"
   },
   "HELM: mustToRawJson": {
     "prefix": "helm:type:mustToRawJson",
     "body": [
-      "mustToRawJson$0",
+      "mustToRawJson ${1:value}$0",
     ],
     "description": "将列表、切片、数组、字典或对象转换成 HTML 字符未转义的 JSON"
   },
   "HELM: fromYaml": {
     "prefix": "helm:type:fromYaml",
     "body": [
-      "fromYaml$0",
+      "fromYaml ${1:value}$0",
     ],
     "description": " 将 YAML 字符串转化成对象。fromYaml 函数将 YAML 字符串转换成模板可用的对象"
   },
   "HELM: fromJson": {
     "prefix": "helm:type:fromJson",
     "body": [
-      "fromJson$0",
+      "fromJson ${1:value}$0",
     ],
     "description": "将 JSON 字符串转化成对象。fromJson 函数将 JSON 字符串转换成模板可用的对象"
   },
   "HELM: toYaml": {
     "prefix": "helm:type:toYaml",
     "body": [
-      "toYaml$0",
+      "toYaml ${1:value}$0",
     ],
     "description": "将列表、切片、数组、字典或对象转换成已缩进的 yaml, 可以从任意源拷贝 yaml 块"
   },
-  // regex
   "HELM: regexMatch": {
     "prefix": "helm:regex:regexMatch",
     "body": [
-      "regexMatch ${1:regex} ${2:value}$0",
+      "regexMatch ${2:regex} ${1:value}$0",
     ],
     "description": "如果输入字符串包含可匹配正则表达式任意字符串，则返回 true"
   },
   "HELM: mustRegexMatch": {
     "prefix": "helm:regex:mustRegexMatch",
     "body": [
-      "mustRegexMatch ${1:regex} ${2:value}$0",
+      "mustRegexMatch ${2:regex} ${1:value}$0",
     ],
     "description": "如果输入字符串包含可匹配正则表达式任意字符串，则返回 true"
   },
   "HELM: regexFindAll": {
     "prefix": "helm:regex:regexFindAll",
     "body": [
-      "regexFindAll ${1:regex} ${2:value} ${3:-1}$0",
+      "regexFindAll ${2:regex} ${1:value} ${3:-1}$0",
     ],
     "description": "返回输入字符串匹配正则表达式的所有切片。最后一个参数表示要返回的子字符串的数量，-1表示返回所有"
   },
   "HELM: mustRegexFindAll": {
     "prefix": "helm:regex:mustRegexFindAll",
     "body": [
-      "mustRegexFindAll ${1:regex} ${2:value} ${3:-1}$0",
+      "mustRegexFindAll ${2:regex} ${1:value} ${3:-1}$0",
     ],
     "description": "返回输入字符串匹配正则表达式的所有切片。最后一个参数表示要返回的子字符串的数量，-1表示返回所有"
   },
   "HELM: regexFind": {
     "prefix": "helm:regex:regexFind",
     "body": [
-      "regexFind ${1:regex} ${2:value}$0",
+      "regexFind ${2:regex} ${1:value}$0",
     ],
     "description": "返回输入字符串的第一个 (最左边的) 正则匹配"
   },
   "HELM: mustRegexFind": {
     "prefix": "helm:regex:mustRegexFind",
     "body": [
-      "mustRegexFind ${1:regex} ${2:value}$0",
+      "mustRegexFind ${2:regex} ${1:value}$0",
     ],
     "description": "返回输入字符串的第一个 (最左边的) 正则匹配"
   },
   "HELM: regexReplaceAll": {
     "prefix": "helm:regex:regexReplaceAll",
     "body": [
-      "regexReplaceAll ${1:regex} ${2:value} ${3:replaceString}$0",
+      "regexReplaceAll ${2:regex} ${1:value} ${3:replaceString}$0",
     ],
     "description": "返回输入字符串的拷贝，用替换字符串替换 Regexp 的匹配项。在替换字符串里面， $ 标志被解释为扩展，因此对于实例来说 $1 表示第一个子匹配的文本"
   },
   "HELM: mustRegexReplaceAll": {
     "prefix": "helm:regex:mustRegexReplaceAll",
     "body": [
-      "mustRegexReplaceAll ${1:regex} ${2:value} ${3:replaceString}$0",
+      "mustRegexReplaceAll ${2:regex} ${1:value} ${3:replaceString}$0",
     ],
     "description": "返回输入字符串的拷贝，用替换字符串替换 Regexp 的匹配项。在替换字符串里面， $ 标志被解释为扩展，因此对于实例来说 $1 表示第一个子匹配的文本"
   },
   "HELM: regexReplaceAllLiteral": {
     "prefix": "helm:regex:regexReplaceAllLiteral",
     "body": [
-      "regexReplaceAllLiteral ${1:regex} ${2:value} ${3:replaceString}$0",
+      "regexReplaceAllLiteral ${2:regex} ${1:value} ${3:replaceString}$0",
     ],
     "description": "返回输入字符串的拷贝，用替换字符串替换 Regexp 的匹配项。匹配字符串直接替换而不是扩展"
   },
   "HELM: mustRegexReplaceAllLiteral": {
     "prefix": "helm:regex:mustRegexReplaceAllLiteral",
     "body": [
-      "mustRegexReplaceAllLiteral ${1:regex} ${2:value} ${3:replaceString}$0",
+      "mustRegexReplaceAllLiteral ${2:regex} ${1:value} ${3:replaceString}$0",
     ],
     "description": "返回输入字符串的拷贝，用替换字符串替换 Regexp 的匹配项。匹配字符串直接替换而不是扩展"
   },
   "HELM: regexSplit": {
     "prefix": "helm:regex:regexSplit",
     "body": [
-      "regexSplit ${1:regex} ${2:value} ${3:-1}$0",
+      "regexSplit ${2:regex} ${1:value} ${3:-1}$0",
     ],
     "description": "HELM: regexSplit \"z+\" \"pizza\" -1 => [pi a]"
   },
   "HELM: mustRegexSplit": {
     "prefix": "helm:regex:mustRegexSplit",
     "body": [
-      "mustRegexSplit ${1:regex} ${2:value} ${3:-1}$0",
+      "mustRegexSplit ${2:regex} ${1:value} ${3:-1}$0",
     ],
     "description": "将输入字符串切成有表达式分隔的子字符串，并返回表达式匹配项之间的切片。最后一个参数 n 确定要返回的子字符串数量，-1表示返回所有匹配"
   },
-  // crypto
   "HELM: sha1sum": {
     "prefix": "helm:crypto:sha1sum",
     "body": [
-      "sha1sum ${1:string}$0",
+      "sha1sum ${1:value}$0",
     ],
     "description": "sha1sum 函数接收一个字符串，并计算它的 SHA1 摘要"
   },
   "HELM: sha256sum": {
     "prefix": "helm:crypto:sha256sum",
     "body": [
-      "sha256sum ${1:string}$0",
+      "sha256sum ${1:value}$0",
     ],
     "description": "sha256sum 函数接收一个字符串，并计算它的 SHA256 摘要"
   },
   "HELM: adler32sum": {
     "prefix": "helm:crypto:adler32sum",
     "body": [
-      "adler32sum ${1:string}$0",
+      "adler32sum ${1:value}$0",
     ],
     "description": "adler32sum 函数接收一个字符串，并计算它的 Adler-32 校验和"
   },
@@ -1064,7 +1099,7 @@
   "HELM: genPrivateKey": {
     "prefix": "helm:crypto:genPrivateKey",
     "body": [
-      "genPrivateKey ${1:key}$0",
+      "genPrivateKey ${1:ecdsa|dsa|rsa}$0",
     ],
     "description": "genPrivateKey 函数生成一个编码成PEM块的新私钥。key 可用值为 ecdsa dsa rsa"
   },
@@ -1110,7 +1145,6 @@
     ],
     "description": "decryptAES 函数接收一个 AES-256 CBC 编码的字符串并返回解密文本"
   },
-  // date
   "HELM: now": {
     "prefix": "helm:date:now",
     "body": [
@@ -1128,14 +1162,14 @@
   "HELM: date": {
     "prefix": "helm:date:date",
     "body": [
-      "date \"${1:yyyy-mm-dd}\"$0",
+      "date \"2006-01-02\"$0",
     ],
     "description": "date函数格式化日期。日期格式化为 YEAR-MONTH-DAY"
   },
   "HELM: dateInZone": {
     "prefix": "helm:date:dateInZone",
     "body": [
-      "dateInZone \"${1:yyyy-mm-dd}\" (now) \"${2:UTC}\" $0",
+      "dateInZone \"2006-01-02\" (now) \"${1:UTC}\" $0",
     ],
     "description": "和 date 一样，但是和时区一起"
   },
@@ -1163,14 +1197,14 @@
   "HELM: dateModify": {
     "prefix": "helm:date:dateModify",
     "body": [
-      "dateModify \"${1:time}\"$0",
+      "dateModify ${1:time}$0",
     ],
     "description": "dateModify 给定一个修改日期并返回时间戳"
   },
   "HELM: mustDateModify": {
     "prefix": "helm:date:mustDateModify",
     "body": [
-      "mustDateModify \"${1:time}\"$0",
+      "mustDateModify ${1:time}$0",
     ],
     "description": "dateModify 给定一个修改日期并返回时间戳"
   },
@@ -1191,18 +1225,17 @@
   "HELM: toDate": {
     "prefix": "helm:date:toDate",
     "body": [
-      "toDate \"${1:2006-01-02}\" \"${2:yyyy-mm-dd}\"$0",
+      "toDate \"2006-01-02\" \"${1:yyyy-mm-dd}\"$0",
     ],
     "description": "toDate 将字符串转换成日期。第一个参数是日期格式，第二个参数是日期字符串。 如果字符串无法转换就会返回 0 值。mustToDate 以防无法转换会返回错误"
   },
   "HELM: mustToDate": {
     "prefix": "helm:date:mustToDate",
     "body": [
-      "mustToDate \"${1:2006-01-02}\" \"${2:yyyy-mm-dd}\"$0",
+      "mustToDate \"2006-01-02\" \"${1:yyyy-mm-dd}\"$0",
     ],
     "description": "mustToDate 将字符串转换成日期。第一个参数是日期格式，第二个参数是日期字符串。 如果字符串无法转换就会返回 0 值。mustToDate 以防无法转换会返回错误"
   },
-  // dict
   "HELM: dict": {
     "prefix": "helm:dict",
     "body": [
@@ -1322,7 +1355,6 @@
     ],
     "description": "deepCopy 和 mustDeepCopy 函数给定一个值并深度拷贝这个值。包括字典和其他结构体。 deepCopy 有问题时会出错， 而 mustDeepCopy 会返回一个错误给模板系统"
   },
-  // encode
   "HELM: b64enc": {
     "prefix": "helm:encode:b64enc",
     "body": [
@@ -1351,7 +1383,6 @@
     ],
     "description": "解码 Base32"
   },
-  // list
   "HELM: list": {
     "prefix": "helm:list",
     "body": [
@@ -1569,7 +1600,6 @@
     ],
     "description": "列表去重、去空值"
   },
-  // math
   "HELM: add": {
     "prefix": "helm:math:add",
     "body": [
@@ -1707,7 +1737,7 @@
   "HELM: getHostByName": {
     "prefix": "helm:network:getHostByName",
     "body": [
-      "getHostByName \"${1:DN}\"$0",
+      "getHostByName ${1:DN}$0",
     ],
     "description": "接收一个域名返回 IP 地址"
   },
@@ -1715,28 +1745,28 @@
   "HELM: base": {
     "prefix": "helm:file:base",
     "body": [
-      "base \"${1:path}\"$0",
+      "base ${1:path}$0",
     ],
     "description": "返回最后一个元素路径"
   },
   "HELM: dir": {
     "prefix": "helm:file:dir",
     "body": [
-      "dir \"${1:path}\"$0",
+      "dir ${1:path}$0",
     ],
     "description": "返回目录，去掉路径的最后一部分。因此 dir \"foo/bar/baz\" 返回 foo/bar"
   },
   "HELM: clean": {
     "prefix": "helm:file:clean",
     "body": [
-      "clean \"${1:path}\"$0",
+      "clean ${1:path}$0",
     ],
     "description": "清除路径。会清理 \"..\""
   },
   "HELM: ext": {
     "prefix": "helm:file:ext",
     "body": [
-      "ext \"${1:file}\"$0",
+      "ext ${1:file}$0",
     ],
     "description": "返回文件扩展"
   },
@@ -1747,7 +1777,6 @@
     ],
     "description": "检查文件路径是否为绝对路径"
   },
-  // reflection
   "HELM: kindOf": {
     "prefix": "helm:reflection:kindOf",
     "body": [
@@ -1786,15 +1815,14 @@
   "HELM: deepEqual": {
     "prefix": "helm:reflection:deepEqual",
     "body": [
-      "deepEqual \"${1:key1}\" ${2:key2}$0",
+      "deepEqual ${1:key1} ${2:key2}$0",
     ],
     "description": "如果两个值相比是 \"deeply equal\", deepEqual 返回 true。也适用于非基本类型 (相较于内置的 eq)"
   },
-  // semantic
   "HELM: semver": {
     "prefix": "helm:semantic:semver",
     "body": [
-      "semver \"${1:version}\"$0",
+      "semver ${1:version}$0",
     ],
     "description": "semver 函数将字符串解析为语义版本"
   },
@@ -1843,7 +1871,7 @@
   "HELM: semverCompare": {
     "prefix": "helm:semantic:semverCompare",
     "body": [
-      "semverCompare \"${1:versionN}\"$0",
+      "semverCompare ${1:versionN}$0",
     ],
     "description": "一个更健壮的比较函数"
   },
@@ -1854,29 +1882,27 @@
     ],
     "description": "Compare函数比较一个 Version 和另一个 Version"
   },
-  // url
   "HELM: urlParse": {
     "prefix": "helm:url:urlParse",
     "body": [
-      "urlParse \"${1:url}\"$0",
+      "urlParse ${1:url}$0",
     ],
     "description": "解析 URL 的字符串并生成包含 URL 部分的字典"
   },
   "HELM: urlJoin": {
     "prefix": "helm:url:urlJoin",
     "body": [
-      "urlJoin \"${1:dict}\"$0",
+      "urlJoin ${1:dict}$0",
     ],
     "description": "将一个映射 (由 urlParse 生成的) 连接成 URL 字符串"
   },
   "HELM: urlquery": {
     "prefix": "helm:url:urlquery",
     "body": [
-      "urlquery \"${1:dict}\"$0",
+      "urlquery ${1:stringForQuery}$0",
     ],
     "description": "返回作为参数传入的值的转义版本，这样就可以嵌入到 URL 的查询部分"
   },
-  // uuid
   "HELM: uuidv4": {
     "prefix": "helm:uuid:uuidv4",
     "body": [
@@ -1884,7 +1910,6 @@
     ],
     "description": "可以生成UUID v4 通用唯一ID"
   },
-  // other
   "HELM: lookup": {
     "prefix": "helm:lookup",
     "body": [
@@ -1892,26 +1917,55 @@
     ],
     "description": "用于在正在运行的集群中查找资源。当和 helm template 命令一起使用时会返回一个空响应"
   },
-  // customize
+  // 流控制
+  "HELM: include": {
+    "prefix": "helm:include",
+    "body": [
+      "include \"$1\"$0",
+    ],
+    "description": "include \"template\""
+  },
+  "HELM: tempalte": {
+    "prefix": "helm:tempalte",
+    "body": [
+      "tempalte \"$1\"$0",
+    ],
+    "description": "template \"template\""
+  },
+  "HELM: range dict": {
+    "prefix": "helm:range:dict",
+    "body": [
+      "range ${2:key} := ${1:value}$0",
+    ],
+    "description": "range $k, $v := dict"
+  },
+  "HELM: range list or slice": {
+    "prefix": "helm:range:list:slice",
+    "body": [
+      "range ${1:value}$0",
+    ],
+    "description": "range list"
+  },
+  "HELM: with": {
+    "prefix": "helm:with",
+    "body": [
+      "with ${1:value}$0",
+    ],
+    "description": "with ."
+  },
+  // others
   "HELM: clean:d": {
-    "prefix": "helm:c:clean",
+    "prefix": "helm:dollar:clean",
     "body": [
       "\\$__clean$0",
     ],
     "description": "定义: $__clean"
   },
   "HELM: var:d": {
-    "prefix": "helm:c:var",
+    "prefix": "helm:dollar:var",
     "body": [
       "\\$__$0",
     ],
     "description": "定义: $__<key>"
-  },
-  "HELM: kk:d": {
-    "prefix": "helm:c:kk",
-    "body": [
-      "\\$__$0",
-    ],
-    "description": "定义: $__<key>"
-  },
+  }
 }
