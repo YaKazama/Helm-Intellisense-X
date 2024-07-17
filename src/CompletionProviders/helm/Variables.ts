@@ -29,14 +29,15 @@ export class VariablesCompletionItemProvider implements vscode.CompletionItemPro
           prevStartLine = document.positionAt(prevContent)
         }
 
-        const pattern: RegExp = /{{-?\s*\$(?<key>(?!_\s*:=)[a-zA-Z0-9_]+?)\s*:=\s*(?<value>.+?)\s*-?}}/g
+        const pattern: RegExp = /{{-?\s*\$(?<key>(?!_\s*:=)\w+?)\s*:=\s*(?<value>.+?)\s*-?}}/g
         for (let i: number = position.line; i >= prevStartLine.line; i--) {
-          const currentLine = document.lineAt(i).text
-          const match: RegExpExecArray | null = pattern.exec(currentLine)
+          const checkLine = document.lineAt(i).text
+          const match: RegExpExecArray | null = pattern.exec(checkLine)
           if (match) {
             if (match.groups === undefined) { continue }
             variables.push({ key: match.groups.key, value: match.groups.value.trim() })
           }
+          pattern.lastIndex = 0
         }
 
         // 👇 旧方法，留着待查
