@@ -150,6 +150,7 @@ function getListOfNamedTemplates(content: string): string[] {
   let result
   while ((result = templatePattern.exec(content)) !== null) {
     matchRanges.push(result[1])
+    templatePattern.lastIndex = 0
   }
   return matchRanges
 }
@@ -165,6 +166,7 @@ export function getListOfVariables(content: string): Variable[] {
   while ((result = variablePattern.exec(content)) !== null) {
     if (result.groups === undefined) { continue }
     matchRanges.push({ key: result.groups.key, value: result.groups.value.trim() })
+    variablePattern.lastIndex = 0
   }
   return matchRanges
 }

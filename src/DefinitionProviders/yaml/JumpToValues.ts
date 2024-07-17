@@ -61,6 +61,7 @@ export class JumpToValuesDefinitionProvider implements vscode.DefinitionProvider
             const c: number = match[1] ? match[1].length : match.index!
             return new vscode.Location(document.uri, new vscode.Position(i, c))
           }
+          matchPattern.lastIndex = 0
         }
       } else {
         const workspaceFolder: string | undefined = vscode.workspace.getWorkspaceFolder(document.uri)?.uri.path
