@@ -41,7 +41,7 @@ export class JumpToVariablesDefinitionProvider implements vscode.DefinitionProvi
           if (match) {
             return new vscode.Location(document.uri, new vscode.Position(i, match.index))
           }
-          pattern.lastIndex = 0
+          // pattern.lastIndex = 0
         }
       } else {
         const workspaceFolder: string | undefined = vscode.workspace.getWorkspaceFolder(document.uri)?.uri.path
