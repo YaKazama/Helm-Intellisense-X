@@ -423,9 +423,23 @@
   "HELM: var:braces:k": {
     "prefix": "helm:braces:varDollar",
     "body": [
+      "{{- \\$$1 := $2 }}$0",
+    ],
+    "description": "代码块 定义变量: {{- \\$var := value }}"
+  },
+  "HELM: var:braces:k:protect": {
+    "prefix": "helm:braces:varDollarProtect",
+    "body": [
+      "{{- \\$_$1 := $2 }}$0",
+    ],
+    "description": "代码块 定义变量: {{- \\$_var := value }}"
+  },
+  "HELM: var:braces:k:private": {
+    "prefix": "helm:braces:varDollarPrivate",
+    "body": [
       "{{- \\$__$1 := $2 }}$0",
     ],
-    "description": "代码块 定义变量: {{- var := value }}"
+    "description": "代码块 定义变量: {{- \\$__var := value }}"
   },
   "HELM: braces:set": {
     "prefix": "helm:braces:set",
@@ -447,6 +461,27 @@
       "{{- $1 = $2 }}$0",
     ],
     "description": "代码块 变量赋值: {{- var = value }}"
+  },
+  "HELM: assignment:braces:k": {
+    "prefix": "helm:braces:assignmentDollar",
+    "body": [
+      "{{- \\$$1 = $2 }}$0",
+    ],
+    "description": "代码块 变量赋值: {{- \\$var = value }}"
+  },
+  "HELM: assignment:braces:k:protect": {
+    "prefix": "helm:braces:assignmentDollarProtect",
+    "body": [
+      "{{- \\$_$1 = $2 }}$0",
+    ],
+    "description": "代码块 变量赋值: {{- \\$_var = value }}"
+  },
+  "HELM: assignment:braces:k:private": {
+    "prefix": "helm:braces:assignmentDollarPrivate",
+    "body": [
+      "{{- \\$__$1 = $2 }}$0",
+    ],
+    "description": "代码块 变量赋值: {{- \\$__var = value }}"
   },
   "HELM: define:braces": {
     "prefix": "helm:braces:define",
@@ -476,7 +511,7 @@
   "HELM: notation:oneline:braces": {
     "prefix": "helm:braces:notationOneLine",
     "body": [
-      "{{- /*  $1 */ -}}$0"
+      "{{- /* $1 */ -}}$0"
     ],
     "description": "块注释"
   },
@@ -770,14 +805,14 @@
   "HELM: hasPrefix": {
     "prefix": "helm:str:hasPrefix",
     "body": [
-      "hasPrefix \"${1:string}\" ${1:value}$0",
+      "hasPrefix \"${2:string}\" ${1:value}$0",
     ],
     "description": "测试字符串是否有给定的前缀"
   },
   "HELM: hasSuffix": {
     "prefix": "helm:str:hasSuffix",
     "body": [
-      "hasSuffix \"${1:string}\" ${1:value}$0",
+      "hasSuffix \"${2:string}\" ${1:value}$0",
     ],
     "description": "测试字符串是否有给定的后缀"
   },
