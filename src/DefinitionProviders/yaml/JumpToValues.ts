@@ -45,7 +45,7 @@ export class JumpToValuesDefinitionProvider implements vscode.DefinitionProvider
     if (pattern.test(transferString)) {
       if (parseValuesOfCurrentFile) {
         let endLine: vscode.Position = position
-        // 注意这个地方是 取反
+        // 注意这个地方是取反，表示检索整个文件
         if (!parseValuesOfCurrentPosition) {
           const lastLineNumber = document.lineCount - 1
           const lastLine = document.lineAt(lastLineNumber)
@@ -88,11 +88,35 @@ export class JumpToValuesDefinitionProvider implements vscode.DefinitionProvider
           valuesFiles = utils.getChartFileFromConfig(chartBasePath)
         } else if (valuesMappingEnable && valuesMappingKey) {
           // 处理 .Values.xxx 映射，用于处理 {{- $_ := set . "Context" .Values.Keyword }}
-          const o: utils.valuesMappingInfo = valuesMapping[valuesMappingKey]
-          valuesMappingInfoKey = o.key
-          valuesFiles = utils.getValueFileNamesFromConfig(chartBasePath, o.path)
+          // const o: utils.valuesMappingInfo = valuesMapping[valuesMappingKey]
+          // valuesMappingInfoKey = o.key
+          // valuesFiles = utils.getValueFileNamesFromConfig(chartBasePath, o.path)
+          const o: utils.valuesMappingInfo = valuesMapping[valuesMappingKey] // valuesMapping['Context'] => 'key': ['values.yaml']
+
+          // 1. 从当前位置向上找 valuesMappingKey 找到第一个匹配值则停止
+          const prevContent: number = document.getText(
+            new vscode.Range(0, 0, position.line, 0)
+          ).lastIndexOf(valuesMappingKey)
+          let prevStartLine: vscode.Position = document.positionAt(prevContent)
+          // 2. 过滤当前位置之前的内容中是否有 {{- $_ := set . "Context" .Values.XXX }}
+          const pattern: RegExp = new RegExp(`{{.*set.*"\\b${valuesMappingKey}\\b"\\s*\\.Values\\.([\\w-]+)\\s*}}`)
+          const match = document.lineAt(prevStartLine).text.match(pattern)
+          // 3. 取值 XXX
+          //  没有定义可用列表时，也使用 []
+          let coverFiles: string[] = []
+          if (match && match[1]) {
+            valuesMappingInfoKey = match[1]
+            coverFiles = o[valuesMappingInfoKey] ?? []
+          } else { // 3.1. 未能取到值 XXX，取文件所在的父目录名
+            const pathList: string[] = document.uri.path.split('/')
+            valuesMappingInfoKey = pathList[pathList.length - 2] ?? ''
+            coverFiles = o[valuesMappingInfoKey] ?? []
+          }
+          // 4. 解析有哪些 yaml 可用
+          // coverFiles 如果为空，则会使用 helm-intellisense-x.values 定义的文件
+          valuesFiles = utils.getValueFileNamesFromConfig(chartBasePath, coverFiles)
         } else {
-          // 默认
+          // 默认：从 chartBasePath 下找 helm-intellisense-x.values 定义的文件
           valuesFiles = utils.getValueFileNamesFromConfig(chartBasePath)
         }
 

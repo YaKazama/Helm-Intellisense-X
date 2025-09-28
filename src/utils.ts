@@ -252,11 +252,8 @@ export function getTransferRange(content: string, lineNumber: number, wordStart:
 }
 
 export type valuesMappingInfo = {
-  key: string,
-  path: string[]
-}
-
-export type valuesMappingInfo1 = {
+  // key: string,
+  // path: string[]
   [key: string]: string[]
 }
 

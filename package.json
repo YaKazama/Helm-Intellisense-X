@@ -164,7 +164,7 @@
           "helm-intellisense-x.valuesMapping": {
             "type": "object",
             "default": {},
-            "description": "yaml 文件键映射配置。示例：{ 'Context': { key: 'key', path: ['values.yaml'] } }"
+            "description": "yaml 文件键映射配置。列表为空时，依次查找父目录名及 values 定义的值。示例：{ 'Context': { 'keyword': ['values.yaml'] } }"
           },
           "helm-intellisense-x.variablesCurrentNamedTemplate": {
             "type": "boolean",

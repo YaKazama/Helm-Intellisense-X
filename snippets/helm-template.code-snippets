@@ -2002,5 +2002,41 @@
       "\\$__$0",
     ],
     "description": "定义: $__<key>"
+  },
+  "HELM: custom:templates:deploy": {
+    "prefix": "helm:tmpl:deploy:k8s",
+    "body": [
+      "{{- \\$_ := set . \"${2:Context}\" .Values.${1:Key} }}",
+      "",
+      "{{- if .${2:Context}.enable }}",
+      "  {{- include \"workloads.Deployment\" . }}",
+      "{{- end }}",
+      ""
+    ],
+    "description": "模板: include workloads.Deployment"
+  },
+  "HELM: custom:templates:StatefulSet": {
+    "prefix": "helm:tmpl:statefulset:k8s",
+    "body": [
+      "{{- \\$_ := set . \"${2:Context}\" .Values.${1:Key} }}",
+      "",
+      "{{- if .${2:Context}.enable }}",
+      "  {{- include \"workloads.StatefulSet\" . }}",
+      "{{- end }}",
+      ""
+    ],
+    "description": "模板: include workloads.StatefulSet"
+  },
+  "HELM: custom:templates:service": {
+    "prefix": "helm:tmpl:service:k8s",
+    "body": [
+      "{{- \\$_ := set . \"${2:Context}\" .Values.${1:Key} }}",
+      "",
+      "{{- if .${2:Context}.enable }}",
+      "  {{- include \"workloads.Service\" . }}",
+      "{{- end }}",
+      ""
+    ],
+    "description": "模板: include workloads.Service"
   }
 }
