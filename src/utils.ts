@@ -80,6 +80,8 @@ export function getValueFileNamesFromConfig(chartBasePath: string, coverFiles?: 
   const config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('helm-intellisense-x')
   // helm-intellisense.values 按顺解析的 yaml 文件。注意：valuse.yaml 应该放在第一个位置。默认 ['values.yaml']
   let valuesFiles: string[] = config.get('values', ['values.yaml'])
+  // coverFiles 覆盖
+  if (coverFiles !== undefined && coverFiles.length > 0) { valuesFiles = coverFiles }
   // helm-intellisense.valuesExclude 需要排除的 yaml 文件或目录。默认 ['node_modules/**']
   const excludeFiles: string[] = config.get('valuesExclude', ['node_modules/**'])
 
@@ -252,6 +254,10 @@ export function getTransferRange(content: string, lineNumber: number, wordStart:
 export type valuesMappingInfo = {
   key: string,
   path: string[]
+}
+
+export type valuesMappingInfo1 = {
+  [key: string]: string[]
 }
 
 export type valuesMapping = {
