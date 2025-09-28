@@ -106,11 +106,20 @@ export class JumpToValuesDefinitionProvider implements vscode.DefinitionProvider
           let coverFiles: string[] = []
           if (match && match[1]) {
             valuesMappingInfoKey = match[1]
-            coverFiles = o[valuesMappingInfoKey] ?? []
+            if (Object.keys(o).includes(valuesMappingInfoKey)) {
+              coverFiles = o[valuesMappingInfoKey]
+            } else {
+              valuesMappingInfoKey = ""
+            }
           } else { // 3.1. 未能取到值 XXX，取文件所在的父目录名
             const pathList: string[] = document.uri.path.split('/')
-            valuesMappingInfoKey = pathList[pathList.length - 2] ?? ''
-            coverFiles = o[valuesMappingInfoKey] ?? []
+            valuesMappingInfoKey = pathList[pathList.length - 2]
+            if (Object.keys(o).includes(valuesMappingInfoKey)) {
+              coverFiles = o[valuesMappingInfoKey]
+            } else {
+              // coverFiles 没有定义或为空，重置 valuesMappingInfoKey = 当前按下 cmd 命令时所获取的值
+              valuesMappingInfoKey = ""
+            }
           }
           // 4. 解析有哪些 yaml 可用
           // coverFiles 如果为空，则会使用 helm-intellisense-x.values 定义的文件
