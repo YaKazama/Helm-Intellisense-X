@@ -178,7 +178,7 @@
           },
           "helm-intellisense-x.envFiles": {
             "type": "array",
-            "default": ["templates/base/_env.tpl"],
+            "default": [],
             "description": "统一管理模板变量的文件列表。引用格式参考 '{{- $__const := include \"base.env\" . | fromYaml }}'"
           },
           "helm-intellisense-x.envJumpPrefixes": {
