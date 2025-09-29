@@ -260,3 +260,15 @@ export type valuesMappingInfo = {
 export type valuesMapping = {
   [keyword: string]: valuesMappingInfo
 }
+
+export function getRegExpPattern(transferString: string, patternStr: string): RegExp {
+  let pattern: RegExp
+  // 处理 锚点、模板中定义的变量
+  const anchorPattern: RegExp = new RegExp(`\\[?\\*\\b${patternStr}\\b\\]?`)
+  if (anchorPattern.test(transferString)) {
+    pattern = new RegExp(`(.*)(&\\b${patternStr.replace('*', '')}\\b)`)
+  } else {
+    pattern = new RegExp(`^(.*)(\\b${patternStr}\\b:)`)
+  }
+  return pattern
+}

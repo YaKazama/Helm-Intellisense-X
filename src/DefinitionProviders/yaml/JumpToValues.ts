@@ -36,6 +36,13 @@ export class JumpToValuesDefinitionProvider implements vscode.DefinitionProvider
         if (transferStringList.length > 2) {
           valuesMappingKey = transferStringList.at(1)!
           if (['Chart', 'Values'].includes(valuesMappingKey)) { valuesMappingKey = '' }
+
+          const pattern: RegExp = new RegExp(`{{.*set.*"\\b([\\w-]+)\\b"\\s*\\.Values.*}}`)
+          const match = currentLine.match(pattern)
+          // 逻辑统一，让 {{- $_ := set . "Context" .Values.XXX }} 也使用 valuesMapping 定义的 yaml 列表
+          if (match && valuesMappingKeys.includes(match[1])) {
+            valuesMappingKey = match[1]
+          }
         }
       }
       if (valuesMappingKey) {
@@ -53,7 +60,7 @@ export class JumpToValuesDefinitionProvider implements vscode.DefinitionProvider
         }
         // 正序检索
         // 定义正则
-        const matchPattern: RegExp = getRegExpPattern(transferString, currentString)
+        const matchPattern: RegExp = utils.getRegExpPattern(transferString, currentString)
         for (let i: number = endLine.line; i >= 0; i--) {
           const currentLine: string = document.lineAt(i).text
           const match: RegExpExecArray | null = matchPattern.exec(currentLine)
@@ -88,9 +95,6 @@ export class JumpToValuesDefinitionProvider implements vscode.DefinitionProvider
           valuesFiles = utils.getChartFileFromConfig(chartBasePath)
         } else if (valuesMappingEnable && valuesMappingKey) {
           // 处理 .Values.xxx 映射，用于处理 {{- $_ := set . "Context" .Values.Keyword }}
-          // const o: utils.valuesMappingInfo = valuesMapping[valuesMappingKey]
-          // valuesMappingInfoKey = o.key
-          // valuesFiles = utils.getValueFileNamesFromConfig(chartBasePath, o.path)
           const o: utils.valuesMappingInfo = valuesMapping[valuesMappingKey] // valuesMapping['Context'] => 'key': ['values.yaml']
 
           // 1. 从当前位置向上找 valuesMappingKey 找到第一个匹配值则停止
@@ -129,7 +133,7 @@ export class JumpToValuesDefinitionProvider implements vscode.DefinitionProvider
           valuesFiles = utils.getValueFileNamesFromConfig(chartBasePath)
         }
 
-        const matchPattern: RegExp = getRegExpPattern(transferString, currentString)
+        const matchPattern: RegExp = utils.getRegExpPattern(transferString, currentString)
         try {
           const locations: vscode.Location[] = await findStringInFiles(valuesFiles, matchPattern, valuesMappingInfoKey)
           return locations.length > 0 ? locations : undefined
@@ -140,16 +144,4 @@ export class JumpToValuesDefinitionProvider implements vscode.DefinitionProvider
       }
     }
   }
-}
-
-function getRegExpPattern(transferString: string, patternStr: string): RegExp {
-  let pattern: RegExp
-  // 处理 锚点、模板中定义的变量
-  const anchorPattern: RegExp = new RegExp(`\\[?\\*\\b${patternStr}\\b\\]?`)
-  if (anchorPattern.test(transferString)) {
-    pattern = new RegExp(`(.*)(&\\b${patternStr.replace('*', '')}\\b)`)
-  } else {
-    pattern = new RegExp(`^(.*)(\\b${patternStr}\\b:)`)
-  }
-  return pattern
 }
