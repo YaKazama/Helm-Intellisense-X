@@ -89,10 +89,12 @@ export function getValueFileNamesFromConfig(chartBasePath: string, coverFiles?: 
 }
 
 // 获取需要加载的 tpl 文件。支持 * 号通配符，使用 glob 模块解析
-export function getTemplatesFileFromConfig(chartBasePath: string): string[] {
+export function getTemplatesFileFromConfig(chartBasePath: string, coverFiles?: string[] | undefined): string[] {
   const config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('helm-intellisense-x')
   // helm-intellisense.templates.external 。默认 ['**/*.tpl']
-  const tplFiles: string[] = config.get('templates', ['**/*.tpl'])
+  let tplFiles: string[] = config.get('templates', ['**/*.tpl'])
+  // coverFiles 覆盖
+  if (coverFiles !== undefined && coverFiles.length > 0) { tplFiles = coverFiles }
   // helm-intellisense-x.templatesExclude 需要从 templates/ 下排除的文件或目录。默认 ['node_modules/**']
   const excludeTplFiles: string[] = config.get('templatesExclude', ['node_modules/**'])
 
@@ -167,7 +169,7 @@ export function getListOfVariables(content: string): Variable[] {
   let result
   while ((result = variablePattern.exec(content)) !== null) {
     if (result.groups === undefined) { continue }
-    matchRanges.push({ key: result.groups.key, value: result.groups.value.trim() })
+    matchRanges.push({ key: result.groups.key.trim(), value: result.groups.value.trim() })
     // variablePattern.lastIndex = 0
   }
   return matchRanges
@@ -271,4 +273,10 @@ export function getRegExpPattern(transferString: string, patternStr: string): Re
     pattern = new RegExp(`^(.*)(\\b${patternStr}\\b:)`)
   }
   return pattern
+}
+
+// 判断数组中的任何一个子字符串是否存在于主字符串中
+export function stringContainsAny(mainStr: string, subStrings: string[]): boolean {
+    // 使用some()方法检查是否有至少一个子字符串被包含
+    return subStrings.some(subStr => mainStr.includes(subStr));
 }

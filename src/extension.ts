@@ -10,6 +10,7 @@ import { NamedTemplatesCompletionItemProvider } from "./CompletionProviders/helm
 import { ReleaseCompletionItemProvider } from "./CompletionProviders/helm/Release";
 import { TemplateCompletionItemProvider } from "./CompletionProviders/helm/Template";
 import { VariablesCompletionItemProvider } from "./CompletionProviders/helm/Variables";
+import { ConstCompletionItemProvider } from "./CompletionProviders/helm/Const";
 import { AnchorCompletionItemProvider } from "./CompletionProviders/yaml/Anchors";
 import { ValuesCompletionItemProvider } from "./CompletionProviders/yaml/Values";
 import { LintCommand } from "./Commands/LintCommand";
@@ -34,6 +35,7 @@ export function activate(context: vscode.ExtensionContext) {
   vscode.languages.registerCompletionItemProvider(helmLanguageActive, new VariablesCompletionItemProvider(), '.')
   vscode.languages.registerCompletionItemProvider(helmLanguageActive, new AnchorCompletionItemProvider(), '*')
   vscode.languages.registerCompletionItemProvider(helmLanguageActive, new ValuesCompletionItemProvider(), '.')
+  vscode.languages.registerCompletionItemProvider(helmLanguageActive, new ConstCompletionItemProvider(), '.')
 
   const collection: vscode.DiagnosticCollection = vscode.languages.createDiagnosticCollection('Helm-Intellisense')
   const lintCommand: vscode.Disposable = vscode.commands.registerCommand(LINT_CMD, () => LintCommand(collection))

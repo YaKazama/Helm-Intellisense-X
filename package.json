@@ -179,12 +179,12 @@
           "helm-intellisense-x.envFiles": {
             "type": "array",
             "default": ["templates/base/_env.tpl"],
-            "description": "统一管理模板变量的文件列表。引用时暂时只支持 '{{- $__const := include \"base.env\" . | fromYaml }}' 方式"
+            "description": "统一管理模板变量的文件列表。引用格式参考 '{{- $__const := include \"base.env\" . | fromYaml }}'"
           },
           "helm-intellisense-x.envJumpPrefixes": {
             "type": "array",
-            "default": ["$__const", "$__var"],
-            "description": "模板变量跳转时的前缀。如 $__const.XXX 或 $__var.YYY 格式才支持跳转，跳转范围仅限于 envFiles 定义的列表"
+            "default": ["$__const"],
+            "description": "模板变量跳转时的前缀。如 $__const.XXX 格式才支持跳转，跳转范围仅限于 envFiles 定义的列表"
           },
           "helm-intellisense-x.separators": {
             "type": "string",
