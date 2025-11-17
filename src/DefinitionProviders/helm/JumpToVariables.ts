@@ -30,11 +30,17 @@ export class JumpToVariablesDefinitionProvider implements vscode.DefinitionProvi
       if (parseVariablesOfCurrentFile) {
         let prevStartLine: vscode.Position = new vscode.Position(0, 0)
         if (parseVariablesOfCurrentNamedTemplate) {
-          const prevContent: number = document.getText(new vscode.Range(0, 0, position.line, 0)).lastIndexOf('define')
-          prevStartLine = document.positionAt(prevContent)
+          const pattern: RegExp = new RegExp(`{{.*\\bdefine\\b.*}}`)
+          const prevContent: string = document.getText(new vscode.Range(0, 0, position.line, 0))
+          let prevContentMatched: number = -1
+          const match: RegExpExecArray | null = pattern.exec(prevContent)
+          if (match) {
+            prevContentMatched = match.index
+          }
+          prevStartLine = document.positionAt(prevContentMatched)
         }
         // 倒序检索
-        const pattern: RegExp = new RegExp(`\\$\\b${currentString}\\b\\s*:=.*}}`)
+        const pattern: RegExp = new RegExp(`\\$\\b${currentString}\\b\\s*\:\=.*}}`)
         for (let i: number = position.line - 1; i >= prevStartLine.line; i--) {
           const currentLine: string = document.lineAt(i).text
           const match: RegExpExecArray | null = pattern.exec(currentLine)
