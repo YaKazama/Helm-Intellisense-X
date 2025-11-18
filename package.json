@@ -183,8 +183,8 @@
           },
           "helm-intellisense-x.envJumpPrefixes": {
             "type": "array",
-            "default": ["$__const"],
-            "description": "模板变量跳转时的前缀。如 $__const.XXX 格式才支持跳转，跳转范围仅限于 envFiles 定义的列表"
+            "default": ["$const", "$_const", "$__const"],
+            "description": "模板变量跳转时的前缀。如 $const.XXX 格式才支持跳转，跳转范围仅限于 envFiles 定义的列表"
           },
           "helm-intellisense-x.separators": {
             "type": "string",
