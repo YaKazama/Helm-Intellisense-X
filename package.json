@@ -2,7 +2,7 @@
   "name": "helm-intellisense-x",
   "displayName": "Helm Intellisense X",
   "description": "Helm Intellisense X",
-  "version": "1.1.2",
+  "version": "1.4.0",
   "license": "MIT",
   "publisher": "YaKazama",
   "icon": "./icons/helm.png",

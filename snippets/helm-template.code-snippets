@@ -1005,12 +1005,40 @@
     ],
     "description": "将 JSON 字符串转化成对象。fromJson 函数将 JSON 字符串转换成模板可用的对象"
   },
+  "HELM: fromJsonArray": {
+    "prefix": "helm:type:fromJsonArray",
+    "body": [
+      "fromJsonArray ${1:value}$0",
+    ],
+    "description": "Convert a JSON array to a list."
+  },
   "HELM: toYaml": {
     "prefix": "helm:type:toYaml",
     "body": [
       "toYaml ${1:value}$0",
     ],
     "description": "将列表、切片、数组、字典或对象转换成已缩进的 yaml, 可以从任意源拷贝 yaml 块"
+  },
+  "HELM: toYamlPretty": {
+    "prefix": "helm:type:toYamlPretty",
+    "body": [
+      "toYamlPretty ${1:value}$0",
+    ],
+    "description": "Convert list, slice, array, dict, or object to indented yaml. Equivalent to toYaml but will additionally indent lists by 2 spaces."
+  },
+  "HELM: toToml": {
+    "prefix": "helm:type:toToml",
+    "body": [
+      "toToml ${1:value}$0",
+    ],
+    "description": "Convert list, slice, array, dict, or object to toml, can be used to copy chunks of toml from any source."
+  },
+  "HELM: fromYamlArray": {
+    "prefix": "helm:type:fromYamlArray",
+    "body": [
+      "fromYamlArray ${1:value}$0",
+    ],
+    "description": "Convert a YAML array to a list."
   },
   "HELM: regexMatch": {
     "prefix": "helm:regex:regexMatch",
@@ -1996,8 +2024,22 @@
     ],
     "description": "定义: $__clean"
   },
-  "HELM: var:d": {
+  "HELM: var:d:self": {
+    "prefix": "helm:dollar:self",
+    "body": [
+      "\\$$0",
+    ],
+    "description": "定义: $<key>"
+  },
+  "HELM: var:d:var1": {
     "prefix": "helm:dollar:var",
+    "body": [
+      "\\$_$0",
+    ],
+    "description": "定义: $_<key>"
+  },
+  "HELM: var:d:var2": {
+    "prefix": "helm:dollar:var:double",
     "body": [
       "\\$__$0",
     ],
