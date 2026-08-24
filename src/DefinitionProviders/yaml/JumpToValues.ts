@@ -1,7 +1,9 @@
 import * as vscode from "vscode";
 import * as utils from "../../utils";
 import { findStringInFiles } from '../findStringInFiles';
+import * as tgzChart from '../../tgzChart';
 
+// 跳转到 yaml 变量定义。同时支持 charts/*.tgz 内的 values.yaml
 export class JumpToValuesDefinitionProvider implements vscode.DefinitionProvider {
   async provideDefinition(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken) {
     // 当前行文本
@@ -49,99 +51,112 @@ export class JumpToValuesDefinitionProvider implements vscode.DefinitionProvider
         pattern = new RegExp(`^(\\$?\\.(Chart|Values|${valuesMappingKey})|[\\w-]+)(\\.[\\w-]+)*|(?:<<:\\s*)?\\[?\\*\\b[\\w-]+\\b\\]?`)
       }
     }
-    if (pattern.test(transferString)) {
-      if (parseValuesOfCurrentFile) {
-        let endLine: vscode.Position = position
-        // 注意这个地方是取反，表示检索整个文件
-        if (!parseValuesOfCurrentPosition) {
-          const lastLineNumber = document.lineCount - 1
-          const lastLine = document.lineAt(lastLineNumber)
-          endLine = new vscode.Position(lastLineNumber, lastLine.text.length)
-        }
-        // 正序检索
-        // 定义正则
-        const matchPattern: RegExp = utils.getRegExpPattern(transferString, currentString)
-        for (let i: number = endLine.line; i >= 0; i--) {
-          const currentLine: string = document.lineAt(i).text
-          const match: RegExpExecArray | null = matchPattern.exec(currentLine)
-          if (match) {
-            const c: number = match[1] ? match[1].length : match.index!
-            return new vscode.Location(document.uri, new vscode.Position(i, c))
-          }
-          // matchPattern.lastIndex = 0
-        }
-      } else {
-        const workspaceFolder: string | undefined = vscode.workspace.getWorkspaceFolder(document.uri)?.uri.path
-        const chartBasePath: string | undefined = utils.getChartBasePath(document.fileName, workspaceFolder)
-        if (chartBasePath === undefined) { return [] }
-        let valuesFiles: string[] = []
-        let valuesMappingInfoKey: string = ''
-        // 确定需要检索的文件范围
-        let isChart: boolean = false
-        let keyPattern: RegExp = /^\$?\.Chart\./g
-        if (keyPattern.test(transferString)) {
-          // Chart.yaml 中的变量，需要首字母转为小写后查询
-          if (currentString.toLowerCase().indexOf('api') > -1) {
-            currentString = currentString.slice(0, 3).toLowerCase() + currentString.slice(3)
-          } else {
-            currentString = currentString.charAt(0).toLowerCase() + currentString.slice(1)
-          }
-          isChart = true
-        }
-        if (isChart) {
-          // 处理 Chart
-          //  要将 currentString 首字母小写
-          //  isChart 标识，区分 Values
-          valuesFiles = utils.getChartFileFromConfig(chartBasePath)
-        } else if (valuesMappingEnable && valuesMappingKey) {
-          // 处理 .Values.xxx 映射，用于处理 {{- $_ := set . "Context" .Values.Keyword }}
-          const o: utils.valuesMappingInfo = valuesMapping[valuesMappingKey] // valuesMapping['Context'] => 'key': ['values.yaml']
+    if (!pattern.test(transferString)) { return undefined }
 
-          // 1. 从当前位置向上找 valuesMappingKey 找到第一个匹配值则停止
-          const prevContent: number = document.getText(
-            new vscode.Range(0, 0, position.line, 0)
-          ).lastIndexOf(valuesMappingKey)
-          let prevStartLine: vscode.Position = document.positionAt(prevContent)
-          // 2. 过滤当前位置之前的内容中是否有 {{- $_ := set . "Context" .Values.XXX }}
-          const pattern: RegExp = new RegExp(`{{.*set.*"\\b${valuesMappingKey}\\b"\\s*\\.Values\\.([\\w-]+)\\s*}}`)
-          const match = document.lineAt(prevStartLine).text.match(pattern)
-          // 3. 取值 XXX
-          //  没有定义可用列表时，也使用 []
-          let coverFiles: string[] = []
-          if (match && match[1]) {
-            valuesMappingInfoKey = match[1]
-            if (Object.keys(o).includes(valuesMappingInfoKey)) {
-              coverFiles = o[valuesMappingInfoKey]
-            } else {
-              valuesMappingInfoKey = ""
-            }
-          } else { // 3.1. 未能取到值 XXX，取文件所在的父目录名
-            const pathList: string[] = document.uri.path.split('/')
-            valuesMappingInfoKey = pathList[pathList.length - 2]
-            if (Object.keys(o).includes(valuesMappingInfoKey)) {
-              coverFiles = o[valuesMappingInfoKey]
-            } else {
-              // coverFiles 没有定义或为空，重置 valuesMappingInfoKey = 当前按下 cmd 命令时所获取的值
-              valuesMappingInfoKey = ""
-            }
-          }
-          // 4. 解析有哪些 yaml 可用
-          // coverFiles 如果为空，则会使用 helm-intellisense-x.values 定义的文件
-          valuesFiles = utils.getValueFileNamesFromConfig(chartBasePath, coverFiles)
-        } else {
-          // 默认：从 chartBasePath 下找 helm-intellisense-x.values 定义的文件
-          valuesFiles = utils.getValueFileNamesFromConfig(chartBasePath)
-        }
-
-        const matchPattern: RegExp = utils.getRegExpPattern(transferString, currentString)
-        try {
-          const locations: vscode.Location[] = await findStringInFiles(valuesFiles, matchPattern, valuesMappingInfoKey)
-          return locations.length > 0 ? locations : undefined
-        } catch (error) {
-          vscode.window.showErrorMessage(`Error finding definition: ${error}`)
-          return undefined
+    if (parseValuesOfCurrentFile) {
+      let endLine: vscode.Position = position
+      // 注意这个地方是取反，表示检索整个文件
+      if (!parseValuesOfCurrentPosition) {
+        const lastLineNumber = document.lineCount - 1
+        const lastLine = document.lineAt(lastLineNumber)
+        endLine = new vscode.Position(lastLineNumber, lastLine.text.length)
+      }
+      // 正序检索
+      // 定义正则
+      const matchPattern: RegExp = utils.getRegExpPattern(transferString, currentString)
+      for (let i: number = endLine.line; i >= 0; i--) {
+        const currentLine: string = document.lineAt(i).text
+        const match: RegExpExecArray | null = matchPattern.exec(currentLine)
+        if (match) {
+          const c: number = match[1] ? match[1].length : match.index!
+          return new vscode.Location(document.uri, new vscode.Position(i, c))
         }
       }
+    } else {
+      const workspaceFolder: string | undefined = vscode.workspace.getWorkspaceFolder(document.uri)?.uri.path
+      const chartBasePath: string | undefined = utils.getChartBasePath(document.fileName, workspaceFolder)
+      if (chartBasePath === undefined) { return [] }
+      let valuesFiles: string[] = []
+      let valuesMappingInfoKey: string = ''
+      // 确定需要检索的文件范围
+      let isChart: boolean = false
+      let keyPattern: RegExp = /^\$?\.Chart\./g
+      if (keyPattern.test(transferString)) {
+        // Chart.yaml 中的变量，需要首字母转为小写后查询
+        if (currentString.toLowerCase().indexOf('api') > -1) {
+          currentString = currentString.slice(0, 3).toLowerCase() + currentString.slice(3)
+        } else {
+          currentString = currentString.charAt(0).toLowerCase() + currentString.slice(1)
+        }
+        isChart = true
+      }
+      if (isChart) {
+        // 处理 Chart
+        //  要将 currentString 首字母小写
+        //  isChart 标识，区分 Values
+        valuesFiles = utils.getChartFileFromConfig(chartBasePath)
+      } else if (valuesMappingEnable && valuesMappingKey) {
+        // 处理 .Values.xxx 映射，用于处理 {{- $_ := set . "Context" .Values.Keyword }}
+        const o: utils.valuesMappingInfo = valuesMapping[valuesMappingKey] // valuesMapping['Context'] => 'key': ['values.yaml']
+
+        // 1. 从当前位置向上找 valuesMappingKey 找到第一个匹配值则停止
+        const prevContent: number = document.getText(
+          new vscode.Range(0, 0, position.line, 0)
+        ).lastIndexOf(valuesMappingKey)
+        let prevStartLine: vscode.Position = document.positionAt(prevContent)
+        // 2. 过滤当前位置之前的内容中是否有 {{- $_ := set . "Context" .Values.XXX }}
+        const pattern: RegExp = new RegExp(`{{.*set.*"\\b${valuesMappingKey}\\b"\\s*\\.Values\\.([\\w-]+)\\s*}}`)
+        const match = document.lineAt(prevStartLine).text.match(pattern)
+        // 3. 取值 XXX
+        //  没有定义可用列表时，也使用 []
+        let coverFiles: string[] = []
+        if (match && match[1]) {
+          valuesMappingInfoKey = match[1]
+          if (Object.keys(o).includes(valuesMappingInfoKey)) {
+            coverFiles = o[valuesMappingInfoKey]
+          } else {
+            valuesMappingInfoKey = ""
+          }
+        } else { // 3.1. 未能取到值 XXX，取文件所在的父目录名
+          const pathList: string[] = document.uri.path.split('/')
+          valuesMappingInfoKey = pathList[pathList.length - 2]
+          if (Object.keys(o).includes(valuesMappingInfoKey)) {
+            coverFiles = o[valuesMappingInfoKey]
+          } else {
+            // coverFiles 没有定义或为空，重置 valuesMappingInfoKey = 当前按下 cmd 命令时所获取的值
+            valuesMappingInfoKey = ""
+          }
+        }
+        // 4. 解析有哪些 yaml 可用
+        // coverFiles 如果为空，则会使用 helm-intellisense-x.values 定义的文件
+        valuesFiles = utils.getValueFileNamesFromConfig(chartBasePath, coverFiles)
+      } else {
+        // 默认：从 chartBasePath 下找 helm-intellisense-x.values 定义的文件
+        valuesFiles = utils.getValueFileNamesFromConfig(chartBasePath)
+      }
+
+      const matchPattern: RegExp = utils.getRegExpPattern(transferString, currentString)
+
+      // 1. 在 yaml 文件中搜索
+      const locations: vscode.Location[] = await findStringInFiles(valuesFiles, matchPattern, valuesMappingInfoKey)
+
+      // 2. 在 charts/*.tgz 中搜索 values.yaml
+      // tgz 内的 yaml 文件名基于配置中的值（如 values.yaml、values.schema.json 等）
+      const tgzFiles: string[] = tgzChart.getTgzFiles(chartBasePath)
+      if (tgzFiles.length > 0) {
+        // 从 valuesFiles 提取文件名（basename）作为 tgz 内查找的候选
+        const yamlBaseNames: string[] = Array.from(new Set(valuesFiles.map((f) => {
+          // 取最后一个非通配符段作为基准文件名
+          const parts: string[] = f.split('/')
+          return parts[parts.length - 1] || f
+        })))
+        for (const tgzPath of tgzFiles) {
+          const matches: tgzChart.TgzLocation[] = await tgzChart.findInTgzYaml(tgzPath, yamlBaseNames, matchPattern, valuesMappingInfoKey)
+          locations.push(...tgzChart.tgzLocationsToVsLocations(matches))
+        }
+      }
+
+      return locations.length > 0 ? locations : undefined
     }
   }
 }

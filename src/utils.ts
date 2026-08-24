@@ -29,8 +29,7 @@ export function getChartBasePath(fileName: string, workspaceFolder?: string | un
   if (['default', 'current'].includes(chartBasePath)) {
     if (chartBasePath === 'current') { basePath = getChartBasePathFromFile(fileName, workspaceFolder) }
   } else {
-    if (chartBasePath.startsWith('/')) { basePath = chartBasePath }
-    return undefined
+    return path.isAbsolute(chartBasePath) ? chartBasePath : undefined
   }
 
   return basePath
@@ -38,23 +37,22 @@ export function getChartBasePath(fileName: string, workspaceFolder?: string | un
 
 // 通过文件路径获取 basePath
 export function getChartBasePathFromFile(fileName: string, workspaceFolder?: string | undefined): string | undefined {
-  if (!fs.statSync(fileName).isFile()) { return undefined }
+  if (!fs.existsSync(fileName) || !fs.statSync(fileName).isFile()) { return undefined }
   if (workspaceFolder === undefined) { return undefined }
 
   // helm-intellisense-x.maxRecursionDepthOfRootPath basePath 父路径的最大递归深度。当 helm-intellisense-x.chartRootPath = 'current' 时生效。默认 10
   const maxRecursionDepthOfRootPath: number = vscode.workspace.getConfiguration('helm-intellisense-x').get('maxRecursionDepthOfRootPath', 10)
 
-  const pattern: RegExp = /[/\\]+(templates|charts)$/g
   let basePath: string = path.dirname(fileName)
 
-  let i: number = 0
-  while (i < maxRecursionDepthOfRootPath || pattern.test(basePath)) {
-    if (workspaceFolder !== undefined && basePath === workspaceFolder) { break }
-    basePath = path.dirname(basePath)
-    i++
+  for (let depth: number = 0; depth <= maxRecursionDepthOfRootPath; depth++) {
+    if (fs.existsSync(path.join(basePath, 'Chart.yaml'))) { return basePath }
+    if (basePath === workspaceFolder) { break }
+    const parentPath: string = path.dirname(basePath)
+    if (parentPath === basePath) { break }
+    basePath = parentPath
   }
-
-  return basePath
+  return workspaceFolder
 }
 
 export function getChartFileFromConfig(chartBasePath: string): string[] {
@@ -147,7 +145,7 @@ export function getAllNamedTemplatesAndVariablesFromFiles(fileName: string, work
 }
 
 // 过滤命名模板
-function getListOfNamedTemplates(content: string): string[] {
+export function getListOfNamedTemplates(content: string): string[] {
   const matchRanges: any[] = []
 
   const templatePattern: RegExp = /{{-?\s*define +"(.+?)"\s*-?}}/g

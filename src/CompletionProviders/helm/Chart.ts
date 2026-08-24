@@ -3,11 +3,12 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as utils from '../../utils';
 import * as yaml from '../../yaml';
+import * as tgzChart from '../../tgzChart';
 import { Yaml } from '../../yaml';
 
-// 解析 Chart.yaml
+// 解析 Chart.yaml。同时支持 charts/*.tgz 内的 Chart.yaml
 export class ChartCompletionItemProvider implements vscode.CompletionItemProvider {
-  provideCompletionItems(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken, context: vscode.CompletionContext): vscode.ProviderResult<vscode.CompletionItem[] | vscode.CompletionList<vscode.CompletionItem>> {
+  async provideCompletionItems(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken, context: vscode.CompletionContext): Promise<vscode.CompletionItem[] | vscode.CompletionList<vscode.CompletionItem> | undefined> {
     const currentLine: string = document.lineAt(position).text
     if (!utils.isInsideBrackets(currentLine, position.character)) { return undefined }
 
@@ -20,7 +21,7 @@ export class ChartCompletionItemProvider implements vscode.CompletionItemProvide
     }
     if (currentString.startsWith('.Chart.')) {
       const workspaceFolder: string | undefined = vscode.workspace.getWorkspaceFolder(document.uri)?.uri.path
-      const content: Yaml | undefined = this.getValuesFromChartFile(document.fileName, workspaceFolder);
+      const content: Yaml | undefined = await this.getValuesFromChartFile(document.fileName, workspaceFolder);
 
       if (currentString === '.Chart.') { return this.getCompletionItemList(content) }
 
@@ -36,15 +37,31 @@ export class ChartCompletionItemProvider implements vscode.CompletionItemProvide
     return utils.getWordAt(currentLine, position - 1).includes('.Chart')
   }
 
-  private getValuesFromChartFile(fileName: string, workspaceFolder?: string | undefined): Yaml | undefined {
+  // 加载 Chart.yaml：优先使用 chartRootPath/Chart.yaml；再叠加 charts/*.tgz 内所有 Chart.yaml
+  private async getValuesFromChartFile(fileName: string, workspaceFolder?: string | undefined): Promise<Yaml | undefined> {
     const chartBasePath: string | undefined = utils.getChartBasePath(fileName, workspaceFolder)
     if (chartBasePath === undefined) { return undefined }
 
     const pathToChartFile: string = path.join(chartBasePath, 'Chart.yaml')
-    if (fs.existsSync(pathToChartFile)) { return yaml.load(pathToChartFile) }
+    let result: Yaml | undefined
+    if (fs.existsSync(pathToChartFile)) { result = yaml.load(pathToChartFile) }
+    if (result === undefined) {
+      vscode.window.showErrorMessage('Could not locate the Chart.yaml .')
+      return undefined
+    }
 
-    vscode.window.showErrorMessage('Could not locate the Chart.yaml .')
-    return undefined
+    // 叠加 charts/*.tgz 内的 Chart.yaml（tgz 后解析）
+    const tgzFiles: string[] = tgzChart.getTgzFiles(chartBasePath)
+    if (tgzFiles.length > 0) {
+      const lodash = require('lodash')
+      for (const tgzPath of tgzFiles) {
+        const tgzChartYaml: Yaml = await tgzChart.getTgzChartYaml(tgzPath)
+        if (typeof tgzChartYaml === 'object' && tgzChartYaml !== null && !Array.isArray(tgzChartYaml)) {
+          result = lodash.merge(result, tgzChartYaml)
+        }
+      }
+    }
+    return result
   }
 
   private updateCurrentKey(currentKey: any, allKeys: string[]): any {

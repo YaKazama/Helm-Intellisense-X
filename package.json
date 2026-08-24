@@ -2,7 +2,7 @@
   "name": "helm-intellisense-x",
   "displayName": "Helm Intellisense X",
   "description": "Helm Intellisense X",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "license": "MIT",
   "publisher": "YaKazama",
   "icon": "./icons/helm.png",
@@ -127,6 +127,11 @@
             ],
             "description": "需要排除的 templates 文件或目录。支持 glob 解析"
           },
+          "helm-intellisense-x.chartsIncludeTgz": {
+            "type": "boolean",
+            "default": true,
+            "description": "是否同时解析 charts/*.tgz 内的内容（命名模板、变量、values、Chart.yaml），以支持 application 模式 chart 调试"
+          },
           "helm-intellisense-x.readFileMode": {
             "type": "string",
             "default": "single",
@@ -179,11 +184,15 @@
           "helm-intellisense-x.envFiles": {
             "type": "array",
             "default": [],
-            "description": "统一管理模板变量的文件列表。引用格式参考 '{{- $__const := include \"base.env\" . | fromYaml }}'"
+            "description": "统一管理模板变量的文件列表。引用格式参考 '{{- $__const := include \"base.env\" \"\" | fromYaml }}'"
           },
           "helm-intellisense-x.envJumpPrefixes": {
             "type": "array",
-            "default": ["$const", "$_const", "$__const"],
+            "default": [
+              "$const",
+              "$_const",
+              "$__const"
+            ],
             "description": "模板变量跳转时的前缀。如 $const.XXX 格式才支持跳转，跳转范围仅限于 envFiles 定义的列表"
           },
           "helm-intellisense-x.separators": {

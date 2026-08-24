@@ -15,11 +15,25 @@ import { AnchorCompletionItemProvider } from "./CompletionProviders/yaml/Anchors
 import { ValuesCompletionItemProvider } from "./CompletionProviders/yaml/Values";
 import { LintCommand } from "./Commands/LintCommand";
 import { LintChartCommand } from "./Commands/LintChartCommand";
+import { registerTgzContentProvider } from "./tgzContentProvider";
+import { clearTgzCache } from "./tgzChart";
 
 const LINT_CMD: string = 'helm-intellisense-x.Lint'
 const LINT_CHART_CMD: string = 'helm-intellisense-x.LintChart'
 export function activate(context: vscode.ExtensionContext) {
   const helmLanguageActive: string[] = ['yaml', 'helm-template']
+
+  // 注册 tgz 协议方案的文本内容提供器，使跳转到 charts/*.tgz 内的文件时可正常显示内容
+  registerTgzContentProvider(context)
+
+  // 配置变化时清除 tgz 缓存，确保重新解析
+  context.subscriptions.push(
+    vscode.workspace.onDidChangeConfiguration((e) => {
+      if (e.affectsConfiguration('helm-intellisense-x.chartsIncludeTgz')) {
+        clearTgzCache()
+      }
+    })
+  )
 
   vscode.languages.registerDefinitionProvider(helmLanguageActive, new JumpToNamedTemplatesDefinitionProvider())
   vscode.languages.registerDefinitionProvider(helmLanguageActive, new JumpToVariablesDefinitionProvider())
@@ -44,4 +58,6 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(lintChartCommand)
 }
 
-export function deactivate() {}
+export function deactivate() {
+  clearTgzCache()
+}

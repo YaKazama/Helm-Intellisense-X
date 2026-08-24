@@ -11,6 +11,15 @@ export function load(filename:string): Yaml | undefined {
   return yaml.load(content, {filename}) as Yaml
 }
 
+// 解析 yaml 字符串内容。filename 可选，用于错误提示
+export function loadFromString(content: string, filename?: string): Yaml | undefined {
+  try {
+    return yaml.load(content, { filename }) as Yaml
+  } catch {
+    return undefined
+  }
+}
+
 // 批量加载 yaml 文件内容，递归合并内容。
 // 参考：https://www.lodashjs.com/docs/lodash.merge#_mergeobject-sources
 export function loadMerge(filenames: string[]): Yaml {

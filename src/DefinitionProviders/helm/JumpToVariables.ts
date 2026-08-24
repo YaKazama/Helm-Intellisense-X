@@ -1,8 +1,9 @@
 import * as vscode from 'vscode';
 import * as utils from "../../utils";
 import { findStringInFiles } from '../findStringInFiles';
+import * as tgzChart from '../../tgzChart';
 
-// 只在当前文件中查找
+// 跳转到变量定义。同时支持 charts/*.tgz 内定义的变量
 export class JumpToVariablesDefinitionProvider implements vscode.DefinitionProvider {
   async provideDefinition(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken) {
     // 当前行文本
@@ -16,55 +17,51 @@ export class JumpToVariablesDefinitionProvider implements vscode.DefinitionProvi
     const transferString: string = utils.getWordAtRange({ str: currentLine, pos: position.character, startSep: '$', rtStartSep: true })
 
     // 当取到的值以 $ 开头时，触发
-    if (transferString.startsWith('$')) {
-      // 从当前行往前找，匹配成功则停止
-      const config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('helm-intellisense-x')
-      const parseVariablesOfCurrentFile: boolean = config.get('variablesCurrentFile', true)
-      // 在当前命名模板（当前位置到向上找到的第一个 define 关键字范围）内查找变量定义
-      // true 向上找到第一个 define 就停止；false 一直找到文档开头
-      const parseVariablesOfCurrentNamedTemplate: boolean = config.get('variablesCurrentNamedTemplate', true)
+    if (!transferString.startsWith('$')) { return undefined }
 
-      // helm-intellisense-x.variablesCurrentFile = true 在当前文件中过滤 Variables
-      // helm-intellisense-x.variablesCurrentFile = false 在所有文件中过滤 Variables
-      //  具体会有多少 *.tpl 文件加载，受 helm-intellisense-x.templates helm-intellisense-x.templatesExclude 设置影响
-      if (parseVariablesOfCurrentFile) {
-        let prevStartLine: vscode.Position = new vscode.Position(0, 0)
-        if (parseVariablesOfCurrentNamedTemplate) {
-          const pattern: RegExp = new RegExp(`{{.*\\bdefine\\b.*}}`)
-          const prevContent: string = document.getText(new vscode.Range(0, 0, position.line, 0))
-          let prevContentMatched: number = -1
-          const match: RegExpExecArray | null = pattern.exec(prevContent)
-          if (match) {
-            prevContentMatched = match.index
-          }
-          prevStartLine = document.positionAt(prevContentMatched)
-        }
-        // 倒序检索
-        const pattern: RegExp = new RegExp(`\\$\\b${currentString}\\b\\s*\:\=.*}}`)
-        for (let i: number = position.line - 1; i >= prevStartLine.line; i--) {
-          const currentLine: string = document.lineAt(i).text
-          const match: RegExpExecArray | null = pattern.exec(currentLine)
-          if (match) {
-            return new vscode.Location(document.uri, new vscode.Position(i, match.index))
-          }
-          // pattern.lastIndex = 0
-        }
-      } else {
-        const workspaceFolder: string | undefined = vscode.workspace.getWorkspaceFolder(document.uri)?.uri.path
-        const chartBasePath: string | undefined = utils.getChartBasePath(document.fileName, workspaceFolder)
-        if (chartBasePath === undefined) { return [] }
-        const tplFiles: string[] = utils.getTemplatesFileFromConfig(chartBasePath)
+    const config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('helm-intellisense-x')
+    const parseVariablesOfCurrentFile: boolean = config.get('variablesCurrentFile', true)
+    // 在当前命名模板（当前位置到向上找到的第一个 define 关键字范围）内查找变量定义
+    const parseVariablesOfCurrentNamedTemplate: boolean = config.get('variablesCurrentNamedTemplate', true)
 
-        const pattern: RegExp = new RegExp(`\\$\\b${currentString}\\b\\s*:=.*}}`)
-
-        try {
-          const locations: vscode.Location[] = await findStringInFiles(tplFiles, pattern)
-          return locations.length > 0 ? locations : undefined
-        } catch (error) {
-          vscode.window.showErrorMessage(`Error finding definition: ${error}`)
-          return undefined
+    if (parseVariablesOfCurrentFile) {
+      let prevStartLine: vscode.Position = new vscode.Position(0, 0)
+      if (parseVariablesOfCurrentNamedTemplate) {
+        const pattern: RegExp = new RegExp(`{{.*\\bdefine\\b.*}}`)
+        const prevContent: string = document.getText(new vscode.Range(0, 0, position.line, 0))
+        let prevContentMatched: number = -1
+        const match: RegExpExecArray | null = pattern.exec(prevContent)
+        if (match) { prevContentMatched = match.index }
+        prevStartLine = document.positionAt(prevContentMatched)
+      }
+      // 倒序检索
+      const pattern: RegExp = new RegExp(`\\$\\b${currentString}\\b\\s*\:\=.*}}`)
+      for (let i: number = position.line - 1; i >= prevStartLine.line; i--) {
+        const currentLine: string = document.lineAt(i).text
+        const match: RegExpExecArray | null = pattern.exec(currentLine)
+        if (match) {
+          return new vscode.Location(document.uri, new vscode.Position(i, match.index))
         }
       }
+    } else {
+      const workspaceFolder: string | undefined = vscode.workspace.getWorkspaceFolder(document.uri)?.uri.path
+      const chartBasePath: string | undefined = utils.getChartBasePath(document.fileName, workspaceFolder)
+      if (chartBasePath === undefined) { return [] }
+      const tplFiles: string[] = utils.getTemplatesFileFromConfig(chartBasePath)
+
+      const pattern: RegExp = new RegExp(`\\$\\b${currentString}\\b\\s*:=.*}}`)
+
+      // 1. 在 .tpl 文件中搜索
+      const locations: vscode.Location[] = await findStringInFiles(tplFiles, pattern)
+
+      // 2. 在 charts/*.tgz 中搜索
+      const tgzFiles: string[] = tgzChart.getTgzFiles(chartBasePath)
+      for (const tgzPath of tgzFiles) {
+        const matches: tgzChart.TgzLocation[] = await tgzChart.findVariableInTgz(tgzPath, pattern)
+        locations.push(...tgzChart.tgzLocationsToVsLocations(matches))
+      }
+
+      return locations.length > 0 ? locations : undefined
     }
   }
 }

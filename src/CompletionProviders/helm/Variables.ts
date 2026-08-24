@@ -1,8 +1,10 @@
 import * as vscode from 'vscode';
 import * as utils from '../../utils';
+import * as tgzChart from '../../tgzChart';
 
+// $variable 提示。同时支持 charts/*.tgz 内定义的变量
 export class VariablesCompletionItemProvider implements vscode.CompletionItemProvider {
-  provideCompletionItems(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken, context: vscode.CompletionContext): vscode.ProviderResult<vscode.CompletionItem[] | vscode.CompletionList<vscode.CompletionItem>> {
+  async provideCompletionItems(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken, context: vscode.CompletionContext): Promise<vscode.CompletionItem[] | vscode.CompletionList<vscode.CompletionItem> | undefined> {
     // 当前行文本
     const currentLine: string = document.lineAt(position).text
     // 检查当前行是否在 {{ }} 之内
@@ -20,7 +22,6 @@ export class VariablesCompletionItemProvider implements vscode.CompletionItemPro
 
       // helm-intellisense-x.variablesCurrentFile = true 在当前文件中过滤 Variables
       // helm-intellisense-x.variablesCurrentFile = false 在所有文件中过滤 Variables
-      //  具体会有多少 *.tpl 文件加载，受 helm-intellisense-x.templates helm-intellisense-x.templatesExclude 设置影响
       let variables: any[] = []
       if (parseVariablesOfCurrentFile) {
         let prevStartLine: vscode.Position = new vscode.Position(0, 0)
@@ -48,22 +49,24 @@ export class VariablesCompletionItemProvider implements vscode.CompletionItemPro
           }
           pattern.lastIndex = 0
         }
-
-        // 👇 旧方法，留着待查
-        // let content: string = ''
-        // // helm-intellisense.variablesCurrentNamedTemplate = true 从光标位置向前查，遇到 define 后停止。在此范围中过滤 Variables
-        // if (parseVariablesOfCurrentNamedTemplate) {
-        //   const prevContent: number = document.getText(new vscode.Range(0, 0, position.line, 0)).lastIndexOf('define')
-        //   const prevStartLine: vscode.Position = document.positionAt(prevContent)
-        //   content = document.getText(new vscode.Range(prevStartLine.line, 0, position.line, 0))
-        // } else {
-        //   content = document.getText()
-        // }
-        // variables = utils.getListOfVariables(content)
-        // 👆 旧方法，留着待查
       } else {
         const workspaceFolder: string | undefined = vscode.workspace.getWorkspaceFolder(document.uri)?.uri.path
-        variables = utils.getAllNamedTemplatesAndVariablesFromFiles(document.fileName, workspaceFolder, true)
+        // 1. 收集 chartRootPath 下所有 .tpl 中的变量
+        variables = utils.getAllNamedTemplatesAndVariablesFromFiles(document.fileName, workspaceFolder, true) as utils.Variable[]
+        // 2. 收集 charts/*.tgz 内的变量
+        const chartBasePath: string | undefined = utils.getChartBasePath(document.fileName, workspaceFolder)
+        if (chartBasePath !== undefined) {
+          const tgzFiles: string[] = tgzChart.getTgzFiles(chartBasePath)
+          const seen: Set<string> = new Set((variables as utils.Variable[]).map((v) => v.key))
+          for (const tgzPath of tgzFiles) {
+            const tgzVars: Map<string, { variable: utils.Variable, location: tgzChart.TgzLocation }> = await tgzChart.getTgzVariables(tgzPath)
+            for (const [key, info] of tgzVars.entries()) {
+              if (seen.has(key)) { continue }
+              seen.add(key)
+              variables.push(info.variable)
+            }
+          }
+        }
       }
 
       let completionItems: vscode.CompletionItem[] = []

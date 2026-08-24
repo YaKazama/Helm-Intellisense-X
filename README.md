@@ -14,6 +14,7 @@ VS Code 插件。基于 [Helm-Intellisense](https://github.com/tim-koehler/Helm-
   - HELM 模板文件（.tpl）中定义的变量
   - `.Values`、`.Chart`、`$.Values`、`$.Chart` 引用的来自 YAML 中的变量
   - YAML 中的锚点
+  - **charts/\*.tgz 内定义的命名模板 / 变量 / values / Chart.yaml**（application 模式 chart 调试）
 - 自动提示
   - .Values
   - .Chart
@@ -23,6 +24,7 @@ VS Code 插件。基于 [Helm-Intellisense](https://github.com/tim-koehler/Helm-
   - 定义的变量
   - 命名模板
   - 锚点
+  - **charts/\*.tgz 内的命名模板、变量、values、Chart.yaml**
 
 ## Commands
 
@@ -46,6 +48,7 @@ VS Code 插件。基于 [Helm-Intellisense](https://github.com/tim-koehler/Helm-
 - `helm-intellisense-x.valuesReverse(false)`: 反转 values 定义的列表
 - `helm-intellisense-x.templates(["**/*.tpl"])`: 需要加载的 templates 文件或目录
 - `helm-intellisense-x.templatesExclude(["node_modules/**"])`: 需要排除的 templates 文件或目录
+- `helm-intellisense-x.chartsIncludeTgz(true)`: 是否同时解析 `charts/*.tgz` 内的命名模板、变量、values、Chart.yaml。开启后可从 application chart 跳转到 dependency chart（tgz 内的文件），方便 application 模式调试
 - `helm-intellisense-x.readFileMode(single)`: 解析文件时的读取模式。
   - `single`: 每个文件独立读取并处理
   - `all`: 一次性读取所有文件后再进行处理
@@ -161,3 +164,14 @@ VS Code 插件。基于 [Helm-Intellisense](https://github.com/tim-koehler/Helm-
   **解决方案**
 
   将文件类型（语言模式）从 `YAML` 切换为 `Helm` 即可
+
+## charts/*.tgz 解析说明
+
+默认开启 `helm-intellisense-x.chartsIncludeTgz`，可读取 `charts/` 目录下的所有 `.tgz` 文件，将其中的：
+
+- 根 chart 及嵌套 dependency chart 的 `templates/**` 中，`define "..."` 视为可命中的命名模板
+- 根 chart 及嵌套 dependency chart 的 `templates/**` 中，`$variable := ...` 视为可命中的变量
+- `values.yaml`（以及 `helm-intellisense-x.values` 中配置的 yaml 文件）合并到 `.Values` 提示/跳转源
+- `Chart.yaml` 合并到 `.Chart` 提示源
+
+跳转时使用 `tgz:` 自定义协议展示文件内容（由 `TextDocumentContentProvider` 提供）。tgz 路径和包内路径经安全编码后传递，可正确处理空格、中文、`#`/`%` 等特殊字符及 Windows 盘符。缓存以 tgz 路径为键，仅首次访问时读取磁盘，配置 `chartsIncludeTgz` 变化或插件卸载时清空缓存。
