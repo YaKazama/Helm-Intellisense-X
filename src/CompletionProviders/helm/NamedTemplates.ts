@@ -12,31 +12,42 @@ export class NamedTemplatesCompletionItemProvider implements vscode.CompletionIt
     const currentString = utils.getWordAt(currentLine, position.character - 1).trim()
     if (currentString.startsWith('"')) {
       const workspaceFolder: string | undefined = vscode.workspace.getWorkspaceFolder(document.uri)?.uri.path
-      // 1. 收集 chartRootPath 下的所有命名模板
-      const result: (string | utils.Variable)[] = utils.getAllNamedTemplatesAndVariablesFromFiles(document.fileName, workspaceFolder)
-      const namedTemplates: string[] = result.filter((item): item is string => typeof item === 'string')
-      // 2. 收集 charts/*.tgz 内的命名模板
       const chartBasePath: string | undefined = utils.getChartBasePath(document.fileName, workspaceFolder)
-      if (chartBasePath !== undefined) {
-        const tgzFiles: string[] = tgzChart.getTgzFiles(chartBasePath)
-        for (const tgzPath of tgzFiles) {
-          const templates: Map<string, tgzChart.TgzLocation> = await tgzChart.getTgzNamedTemplates(tgzPath)
-          for (const key of templates.keys()) {
-            if (!namedTemplates.includes(key)) { namedTemplates.push(key) }
+      if (chartBasePath === undefined) { return [] }
+
+      // 1. 收集当前 chart、file:// 依赖和 charts/ 下已解压依赖的命名模板及来源
+      const namedTemplates: Map<string, string[]> = utils.getNamedTemplatesWithSources(chartBasePath)
+      // 2. 收集 charts/*.tgz 内的命名模板及包内路径
+      const tgzFiles: string[] = tgzChart.getTgzFilesWithLocalDependencies(chartBasePath)
+      for (const tgzPath of tgzFiles) {
+        const templates: Map<string, tgzChart.TgzLocation[]> = await tgzChart.getTgzNamedTemplates(tgzPath)
+        for (const [templateName, locations] of templates.entries()) {
+          const sources: string[] = namedTemplates.get(templateName) ?? []
+          for (const location of locations) {
+            const source: string = `${location.tgzPath}!${location.innerPath}`
+            if (!sources.includes(source)) { sources.push(source) }
           }
+          namedTemplates.set(templateName, sources)
         }
       }
-      return this.getCompletionItemList(namedTemplates) ?? []
+      return this.getCompletionItemList(position, currentString, namedTemplates)
     }
 
     return undefined
   }
 
-  private getCompletionItemList(namedTemplates: string[]): vscode.CompletionItem[] | vscode.CompletionList<vscode.CompletionItem> | undefined {
+  private getCompletionItemList(position: vscode.Position, currentString: string, namedTemplates: Map<string, string[]>): vscode.CompletionItem[] {
     const listOfCompletionItems: vscode.CompletionItem[] = []
-    for (const namedTemplate of namedTemplates) {
+    const typedPrefix: string = currentString.startsWith('"') ? currentString.substring(1) : currentString
+    const replacementRange: vscode.Range = new vscode.Range(
+      new vscode.Position(position.line, Math.max(0, position.character - typedPrefix.length)),
+      position
+    )
+    for (const [namedTemplate, sources] of namedTemplates.entries()) {
       const item: vscode.CompletionItem = new vscode.CompletionItem(namedTemplate, vscode.CompletionItemKind.Field)
       item.insertText = namedTemplate
+      item.detail = sources.join(' | ')
+      item.range = replacementRange
       listOfCompletionItems.push(item)
     }
     return listOfCompletionItems

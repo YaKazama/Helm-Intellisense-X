@@ -56,7 +56,7 @@ export class VariablesCompletionItemProvider implements vscode.CompletionItemPro
         // 2. 收集 charts/*.tgz 内的变量
         const chartBasePath: string | undefined = utils.getChartBasePath(document.fileName, workspaceFolder)
         if (chartBasePath !== undefined) {
-          const tgzFiles: string[] = tgzChart.getTgzFiles(chartBasePath)
+          const tgzFiles: string[] = tgzChart.getTgzFilesWithLocalDependencies(chartBasePath)
           const seen: Set<string> = new Set((variables as utils.Variable[]).map((v) => v.key))
           for (const tgzPath of tgzFiles) {
             const tgzVars: Map<string, { variable: utils.Variable, location: tgzChart.TgzLocation }> = await tgzChart.getTgzVariables(tgzPath)

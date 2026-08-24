@@ -37,77 +37,93 @@ export class ChartCompletionItemProvider implements vscode.CompletionItemProvide
     return utils.getWordAt(currentLine, position - 1).includes('.Chart')
   }
 
-  // 加载 Chart.yaml：优先使用 chartRootPath/Chart.yaml；再叠加 charts/*.tgz 内所有 Chart.yaml
+  // 合并 file:// 依赖和 tgz 中的 Chart.yaml，根 Chart 最后合并并保持最高优先级。
   private async getValuesFromChartFile(fileName: string, workspaceFolder?: string | undefined): Promise<Yaml | undefined> {
     const chartBasePath: string | undefined = utils.getChartBasePath(fileName, workspaceFolder)
     if (chartBasePath === undefined) { return undefined }
 
     const pathToChartFile: string = path.join(chartBasePath, 'Chart.yaml')
-    let result: Yaml | undefined
-    if (fs.existsSync(pathToChartFile)) { result = yaml.load(pathToChartFile) }
-    if (result === undefined) {
+    if (!fs.existsSync(pathToChartFile)) {
       vscode.window.showErrorMessage('Could not locate the Chart.yaml .')
       return undefined
     }
 
-    // 叠加 charts/*.tgz 内的 Chart.yaml（tgz 后解析）
-    const tgzFiles: string[] = tgzChart.getTgzFiles(chartBasePath)
-    if (tgzFiles.length > 0) {
-      const lodash = require('lodash')
-      for (const tgzPath of tgzFiles) {
+    const lodash = require('lodash')
+    const mergeChartYaml = (target: Yaml, source: Yaml): Yaml => lodash.mergeWith(
+      target,
+      source,
+      (_targetValue: any, sourceValue: any) => Array.isArray(sourceValue) ? sourceValue : undefined
+    )
+    let result: Yaml = {}
+    const chartPaths: string[] = utils.getChartPathsWithLocalDependencies(chartBasePath).reverse()
+    for (const chartPath of chartPaths) {
+      // 先合并当前 chart 打包的依赖，再合并当前 chart 自身。
+      for (const tgzPath of tgzChart.getTgzFiles(chartPath)) {
         const tgzChartYaml: Yaml = await tgzChart.getTgzChartYaml(tgzPath)
         if (typeof tgzChartYaml === 'object' && tgzChartYaml !== null && !Array.isArray(tgzChartYaml)) {
-          result = lodash.merge(result, tgzChartYaml)
+          result = mergeChartYaml(result, tgzChartYaml)
         }
+      }
+      const chartYamlPath: string = path.join(chartPath, 'Chart.yaml')
+      const chartYaml: Yaml | undefined = yaml.load(chartYamlPath)
+      if (typeof chartYaml === 'object' && chartYaml !== null && !Array.isArray(chartYaml)) {
+        result = mergeChartYaml(result, chartYaml)
       }
     }
     return result
   }
 
   private updateCurrentKey(currentKey: any, allKeys: string[]): any {
-    let result
-    for (const key of allKeys) {
-      if (Array.isArray(currentKey[key])) { return undefined }
-      result = currentKey[key]
-      if (result === undefined) {
-        if (key.toLowerCase().indexOf('api') > -1) {
-          result = currentKey[key.slice(0, 3).toLowerCase() + key.slice(1)]
-        } else {
-          result = currentKey[key.charAt(0).toLowerCase() + key.slice(1)]
-        }
-      }
+    for (const requestedKey of allKeys) {
+      if (typeof currentKey !== 'object' || currentKey === null || Array.isArray(currentKey)) { return undefined }
+      const actualKey: string | undefined = Object.keys(currentKey).find((key) => key.toLowerCase() === requestedKey.toLowerCase())
+      if (actualKey === undefined || Array.isArray(currentKey[actualKey])) { return undefined }
+      currentKey = currentKey[actualKey]
     }
-    return result
+    return currentKey
   }
 
   private getCompletionItemList(currentKey: any, native: boolean = false): vscode.CompletionItem[] {
     const keys: any[] = []
-    for (let key in currentKey) {
-      if (!native) {
-        if (key.toLowerCase().indexOf('api') > -1) {
-          key = key.slice(0, 3).toUpperCase() + key.slice(3)
-        } else {
-          key = key.charAt(0).toUpperCase() + key.slice(1)
-        }
+    if (typeof currentKey !== 'object' || currentKey === null || Array.isArray(currentKey)) { return keys }
+    for (const sourceKey of Object.keys(currentKey)) {
+      const label: string = native ? sourceKey : this.toHelmChartKey(sourceKey)
+      const value: any = currentKey[sourceKey]
+      if (value === null) {
+        const nullItem = new vscode.CompletionItem(label, vscode.CompletionItemKind.Value)
+        nullItem.detail = 'null'
+        keys.push(nullItem)
+        continue
       }
-      switch (typeof currentKey[key]) {
+      if (Array.isArray(value)) {
+        const arrayItem = new vscode.CompletionItem(label, vscode.CompletionItemKind.Value)
+        arrayItem.detail = `[${value.length} items]`
+        keys.push(arrayItem)
+        continue
+      }
+      switch (typeof value) {
         case 'object':
-          keys.push(new vscode.CompletionItem(key, vscode.CompletionItemKind.Method))
+          keys.push(new vscode.CompletionItem(label, vscode.CompletionItemKind.Method))
           break
         case 'string':
         case 'boolean':
         case 'number':
-          const valueItem = new vscode.CompletionItem(key, vscode.CompletionItemKind.Field)
-          valueItem.detail = currentKey[key].toString()
+          const valueItem = new vscode.CompletionItem(label, vscode.CompletionItemKind.Field)
+          valueItem.detail = value.toString()
           keys.push(valueItem)
           break
         default:
-          const unknownItem = new vscode.CompletionItem(key, vscode.CompletionItemKind.Issue)
+          const unknownItem = new vscode.CompletionItem(label, vscode.CompletionItemKind.Issue)
           unknownItem.detail = 'Helm-Intellisense-X could not find type'
           keys.push(unknownItem)
           break
       }
     }
     return keys
+  }
+
+  private toHelmChartKey(key: string): string {
+    if (key.toLowerCase() === 'apiversion') { return 'APIVersion' }
+    return key.charAt(0).toUpperCase() + key.substring(1)
   }
 }

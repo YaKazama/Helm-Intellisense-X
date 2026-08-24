@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
 import { readTgzFile, TarFileMap } from './tarReader';
-import { getListOfVariables, Variable } from './utils';
+import { getChartPathsWithLocalDependencies, getListOfVariables, Variable } from './utils';
 import { loadFromString, Yaml } from './yaml';
 
 // VS Code 中的 tgz 协议方案；实际路径编码在 URI query 中
@@ -123,10 +123,10 @@ export async function getTgzValuesAsYaml(tgzPath: string, fileNames: string[]): 
 }
 
 // 在 tgz 内的所有模板文件中搜索命名模板定义
-// 返回 templateName -> TgzLocation
-export async function getTgzNamedTemplates(tgzPath: string): Promise<Map<string, TgzLocation>> {
+// 返回 templateName -> TgzLocation[]，保留同名模板的全部来源
+export async function getTgzNamedTemplates(tgzPath: string): Promise<Map<string, TgzLocation[]>> {
   const info: TgzChartInfo = await getTgzChartInfo(tgzPath)
-  const result: Map<string, TgzLocation> = new Map<string, TgzLocation>()
+  const result: Map<string, TgzLocation[]> = new Map<string, TgzLocation[]>()
   const tplFiles: string[] = listTemplateFilesInTgz(info.entries, info.chartRoot)
   const defineRegex: RegExp = /{{-?\s*define\s+"([^"]+)"\s*-?}}/g
 
@@ -142,7 +142,9 @@ export async function getTgzNamedTemplates(tgzPath: string): Promise<Map<string,
       const line: number = content.substring(0, matchIndex).split('\n').length - 1
       const lineStart: number = content.lastIndexOf('\n', matchIndex - 1) + 1
       const column: number = matchIndex - lineStart
-      result.set(templateName, { tgzPath, innerPath, line, column })
+      const locations: TgzLocation[] = result.get(templateName) ?? []
+      locations.push({ tgzPath, innerPath, line, column })
+      result.set(templateName, locations)
     }
   }
   return result
@@ -238,6 +240,15 @@ export function getTgzFiles(chartBasePath: string): string[] {
     .filter((fullPath) => {
       try { return fs.statSync(fullPath).isFile() } catch { return false }
     })
+}
+
+// 获取当前 chart 及其 file:// 递归依赖中 charts/*.tgz 的全部文件。
+export function getTgzFilesWithLocalDependencies(chartBasePath: string): string[] {
+  const result: Set<string> = new Set<string>()
+  for (const chartPath of getChartPathsWithLocalDependencies(chartBasePath)) {
+    for (const tgzFile of getTgzFiles(chartPath)) { result.add(tgzFile) }
+  }
+  return Array.from(result)
 }
 
 // 将 TgzLocation 转为 vscode.Location，URI 使用 tgz: 协议

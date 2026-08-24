@@ -35,27 +35,28 @@ export function activate(context: vscode.ExtensionContext) {
     })
   )
 
-  vscode.languages.registerDefinitionProvider(helmLanguageActive, new JumpToNamedTemplatesDefinitionProvider())
-  vscode.languages.registerDefinitionProvider(helmLanguageActive, new JumpToVariablesDefinitionProvider())
-  vscode.languages.registerDefinitionProvider(helmLanguageActive, new JumpToValuesDefinitionProvider())
-  vscode.languages.registerDefinitionProvider(helmLanguageActive, new JumpToConstDefineProvider())
-
-  vscode.languages.registerCompletionItemProvider(helmLanguageActive, new CapabilitiesCompletionItemProvider(), '.')
-  vscode.languages.registerCompletionItemProvider(helmLanguageActive, new ChartCompletionItemProvider(), '.')
-  vscode.languages.registerCompletionItemProvider(helmLanguageActive, new FilesCompletionItemProvider(), '.')
-  vscode.languages.registerCompletionItemProvider(helmLanguageActive, new NamedTemplatesCompletionItemProvider(), '"')
-  vscode.languages.registerCompletionItemProvider(helmLanguageActive, new ReleaseCompletionItemProvider(), '.')
-  vscode.languages.registerCompletionItemProvider(helmLanguageActive, new TemplateCompletionItemProvider(), '.')
-  vscode.languages.registerCompletionItemProvider(helmLanguageActive, new VariablesCompletionItemProvider(), '.')
-  vscode.languages.registerCompletionItemProvider(helmLanguageActive, new AnchorCompletionItemProvider(), '*')
-  vscode.languages.registerCompletionItemProvider(helmLanguageActive, new ValuesCompletionItemProvider(), '.')
-  vscode.languages.registerCompletionItemProvider(helmLanguageActive, new ConstCompletionItemProvider(), '.')
-
   const collection: vscode.DiagnosticCollection = vscode.languages.createDiagnosticCollection('Helm-Intellisense')
   const lintCommand: vscode.Disposable = vscode.commands.registerCommand(LINT_CMD, () => LintCommand(collection))
   const lintChartCommand: vscode.Disposable = vscode.commands.registerCommand(LINT_CHART_CMD, () => LintChartCommand(collection))
-  context.subscriptions.push(lintCommand)
-  context.subscriptions.push(lintChartCommand)
+  context.subscriptions.push(
+    vscode.languages.registerDefinitionProvider(helmLanguageActive, new JumpToNamedTemplatesDefinitionProvider()),
+    vscode.languages.registerDefinitionProvider(helmLanguageActive, new JumpToVariablesDefinitionProvider()),
+    vscode.languages.registerDefinitionProvider(helmLanguageActive, new JumpToValuesDefinitionProvider()),
+    vscode.languages.registerDefinitionProvider(helmLanguageActive, new JumpToConstDefineProvider()),
+    vscode.languages.registerCompletionItemProvider(helmLanguageActive, new CapabilitiesCompletionItemProvider(), '.'),
+    vscode.languages.registerCompletionItemProvider(helmLanguageActive, new ChartCompletionItemProvider(), '.'),
+    vscode.languages.registerCompletionItemProvider(helmLanguageActive, new FilesCompletionItemProvider(), '.'),
+    vscode.languages.registerCompletionItemProvider(helmLanguageActive, new NamedTemplatesCompletionItemProvider(), '"'),
+    vscode.languages.registerCompletionItemProvider(helmLanguageActive, new ReleaseCompletionItemProvider(), '.'),
+    vscode.languages.registerCompletionItemProvider(helmLanguageActive, new TemplateCompletionItemProvider(), '.'),
+    vscode.languages.registerCompletionItemProvider(helmLanguageActive, new VariablesCompletionItemProvider(), '.'),
+    vscode.languages.registerCompletionItemProvider(helmLanguageActive, new AnchorCompletionItemProvider(), '*'),
+    vscode.languages.registerCompletionItemProvider(helmLanguageActive, new ValuesCompletionItemProvider(), '.'),
+    vscode.languages.registerCompletionItemProvider(helmLanguageActive, new ConstCompletionItemProvider(), '.'),
+    collection,
+    lintCommand,
+    lintChartCommand
+  )
 }
 
 export function deactivate() {

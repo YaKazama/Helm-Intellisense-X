@@ -41,7 +41,7 @@ export class ConstCompletionItemProvider implements vscode.CompletionItemProvide
 
       const workspaceFolder: string | undefined = vscode.workspace.getWorkspaceFolder(document.uri)?.uri.path;
       const chartBasePath: string | undefined = utils.getChartBasePath(document.fileName, workspaceFolder);
-      const _envFiles: string[] = utils.getTemplatesFileFromConfig(chartBasePath!, envFiles);
+      const _envFiles: string[] = utils.getTemplateFilesWithLocalDependencies(chartBasePath!, envFiles);
 
       // 存储解析后的变量，支持嵌套结构
       const variables: utils.Variable[] = [];

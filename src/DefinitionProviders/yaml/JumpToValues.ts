@@ -83,8 +83,8 @@ export class JumpToValuesDefinitionProvider implements vscode.DefinitionProvider
       let keyPattern: RegExp = /^\$?\.Chart\./g
       if (keyPattern.test(transferString)) {
         // Chart.yaml 中的变量，需要首字母转为小写后查询
-        if (currentString.toLowerCase().indexOf('api') > -1) {
-          currentString = currentString.slice(0, 3).toLowerCase() + currentString.slice(3)
+        if (currentString.toLowerCase() === 'apiversion') {
+          currentString = 'apiVersion'
         } else {
           currentString = currentString.charAt(0).toLowerCase() + currentString.slice(1)
         }
@@ -94,7 +94,7 @@ export class JumpToValuesDefinitionProvider implements vscode.DefinitionProvider
         // 处理 Chart
         //  要将 currentString 首字母小写
         //  isChart 标识，区分 Values
-        valuesFiles = utils.getChartFileFromConfig(chartBasePath)
+        valuesFiles = utils.getChartFilesWithLocalDependencies(chartBasePath)
       } else if (valuesMappingEnable && valuesMappingKey) {
         // 处理 .Values.xxx 映射，用于处理 {{- $_ := set . "Context" .Values.Keyword }}
         const o: utils.valuesMappingInfo = valuesMapping[valuesMappingKey] // valuesMapping['Context'] => 'key': ['values.yaml']
@@ -129,20 +129,21 @@ export class JumpToValuesDefinitionProvider implements vscode.DefinitionProvider
         }
         // 4. 解析有哪些 yaml 可用
         // coverFiles 如果为空，则会使用 helm-intellisense-x.values 定义的文件
-        valuesFiles = utils.getValueFileNamesFromConfig(chartBasePath, coverFiles)
+        valuesFiles = utils.getValueFileNamesWithLocalDependencies(chartBasePath, coverFiles)
       } else {
         // 默认：从 chartBasePath 下找 helm-intellisense-x.values 定义的文件
-        valuesFiles = utils.getValueFileNamesFromConfig(chartBasePath)
+        valuesFiles = utils.getValueFileNamesWithLocalDependencies(chartBasePath)
       }
 
       const matchPattern: RegExp = utils.getRegExpPattern(transferString, currentString)
+      const startString: string | undefined = valuesMappingInfoKey || undefined
 
       // 1. 在 yaml 文件中搜索
-      const locations: vscode.Location[] = await findStringInFiles(valuesFiles, matchPattern, valuesMappingInfoKey)
+      const locations: vscode.Location[] = await findStringInFiles(valuesFiles, matchPattern, startString)
 
       // 2. 在 charts/*.tgz 中搜索 values.yaml
       // tgz 内的 yaml 文件名基于配置中的值（如 values.yaml、values.schema.json 等）
-      const tgzFiles: string[] = tgzChart.getTgzFiles(chartBasePath)
+      const tgzFiles: string[] = tgzChart.getTgzFilesWithLocalDependencies(chartBasePath)
       if (tgzFiles.length > 0) {
         // 从 valuesFiles 提取文件名（basename）作为 tgz 内查找的候选
         const yamlBaseNames: string[] = Array.from(new Set(valuesFiles.map((f) => {
@@ -151,7 +152,7 @@ export class JumpToValuesDefinitionProvider implements vscode.DefinitionProvider
           return parts[parts.length - 1] || f
         })))
         for (const tgzPath of tgzFiles) {
-          const matches: tgzChart.TgzLocation[] = await tgzChart.findInTgzYaml(tgzPath, yamlBaseNames, matchPattern, valuesMappingInfoKey)
+          const matches: tgzChart.TgzLocation[] = await tgzChart.findInTgzYaml(tgzPath, yamlBaseNames, matchPattern, startString)
           locations.push(...tgzChart.tgzLocationsToVsLocations(matches))
         }
       }

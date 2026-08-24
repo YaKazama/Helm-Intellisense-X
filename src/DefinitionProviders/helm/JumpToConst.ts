@@ -27,7 +27,7 @@ export class JumpToConstDefineProvider implements vscode.DefinitionProvider {
 
       const workspaceFolder: string | undefined = vscode.workspace.getWorkspaceFolder(document.uri)?.uri.path
       const chartBasePath: string | undefined = utils.getChartBasePath(document.fileName, workspaceFolder)
-      const valuesFiles: string[] = utils.getValueFileNamesFromConfig(chartBasePath!, envFiles)
+      const valuesFiles: string[] = utils.getValueFileNamesWithLocalDependencies(chartBasePath!, envFiles)
 
       const matchPattern: RegExp = utils.getRegExpPattern(transferString, currentString)
       try {

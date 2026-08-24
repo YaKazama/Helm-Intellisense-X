@@ -9,16 +9,11 @@ export function getValuesFromFile(fileName: string, workspaceFolder?: string | u
   const chartBasePath: string | undefined = getChartBasePath(fileName, workspaceFolder)
   if (chartBasePath === undefined) { return undefined }
 
-  // 是否反转 helm-intellisense-x.values 列表中的文件
-  const reverse: boolean | undefined = vscode.workspace.getConfiguration('helm-intellisense-x').get('valuesReverse', false)
-  let filenames: string[] = getValueFileNamesFromConfig(chartBasePath)
-  if (reverse) { filenames = filenames.reverse() }
-
-  return yaml.loadMerge(filenames)
+  return yaml.loadMerge(getValueFileNamesWithLocalDependencies(chartBasePath))
 }
 
 // 获取 chart 所需要的 basePath
-// helm-intellisense-x.chartRootPath = 'default' 使用 vscode 的 workspaceFolder
+// helm-intellisense-x.chartRootPath = 'default' 优先使用包含 Chart.yaml 的 workspaceFolder；否则从当前文件向上查找 Chart.yaml
 // helm-intellisense-x.chartRootPath = 'current' 使用当前文件所在的目录
 // helm-intellisense-x.chartRootPath = '/path/to/folder' 绝对路径，直接使用
 export function getChartBasePath(fileName: string, workspaceFolder?: string | undefined): string | undefined {
@@ -27,7 +22,10 @@ export function getChartBasePath(fileName: string, workspaceFolder?: string | un
 
   let basePath: string | undefined = workspaceFolder
   if (['default', 'current'].includes(chartBasePath)) {
-    if (chartBasePath === 'current') { basePath = getChartBasePathFromFile(fileName, workspaceFolder) }
+    const workspaceIsChart: boolean = workspaceFolder !== undefined && fs.existsSync(path.join(workspaceFolder, 'Chart.yaml'))
+    if (chartBasePath === 'current' || !workspaceIsChart) {
+      basePath = getChartBasePathFromFile(fileName, workspaceFolder)
+    }
   } else {
     return path.isAbsolute(chartBasePath) ? chartBasePath : undefined
   }
@@ -38,7 +36,6 @@ export function getChartBasePath(fileName: string, workspaceFolder?: string | un
 // 通过文件路径获取 basePath
 export function getChartBasePathFromFile(fileName: string, workspaceFolder?: string | undefined): string | undefined {
   if (!fs.existsSync(fileName) || !fs.statSync(fileName).isFile()) { return undefined }
-  if (workspaceFolder === undefined) { return undefined }
 
   // helm-intellisense-x.maxRecursionDepthOfRootPath basePath 父路径的最大递归深度。当 helm-intellisense-x.chartRootPath = 'current' 时生效。默认 10
   const maxRecursionDepthOfRootPath: number = vscode.workspace.getConfiguration('helm-intellisense-x').get('maxRecursionDepthOfRootPath', 10)
@@ -47,7 +44,7 @@ export function getChartBasePathFromFile(fileName: string, workspaceFolder?: str
 
   for (let depth: number = 0; depth <= maxRecursionDepthOfRootPath; depth++) {
     if (fs.existsSync(path.join(basePath, 'Chart.yaml'))) { return basePath }
-    if (basePath === workspaceFolder) { break }
+    if (workspaceFolder !== undefined && basePath === workspaceFolder) { break }
     const parentPath: string = path.dirname(basePath)
     if (parentPath === basePath) { break }
     basePath = parentPath
@@ -99,6 +96,200 @@ export function getTemplatesFileFromConfig(chartBasePath: string, coverFiles?: s
   return parseGlobFiles(chartBasePath, tplFiles, excludeTplFiles)
 }
 
+// 获取 templates/ 下可用于声明命名模板的全部普通文件。
+// Helm 不根据扩展名决定模板文件，define 可以出现在 .tpl/.yaml/.txt 或其他任意文件中。
+export function getNamedTemplateFiles(chartBasePath: string): string[] {
+  const excludeFiles: string[] = vscode.workspace.getConfiguration('helm-intellisense-x').get('templatesExclude', ['node_modules/**'])
+  const files: Set<string> = new Set<string>(getTemplatesFileFromConfig(chartBasePath))
+  const filesInTemplatesDirectory: string[] = globSync('templates/**/*', {
+    cwd: chartBasePath,
+    ignore: excludeFiles,
+    absolute: true,
+    nodir: true,
+    dot: true
+  })
+  for (const templateFile of filesInTemplatesDirectory) { files.add(templateFile) }
+  return Array.from(files).filter((templateFile) => {
+    try { return fs.statSync(templateFile).isFile() } catch { return false }
+  })
+}
+
+type ChartDependency = {
+  repository?: unknown
+}
+
+// 递归获取 Chart.yaml 中 repository: file://... 指向的本地依赖 chart。
+// 仅返回包含 Chart.yaml 的目录，并用 realpath 防止循环依赖和重复扫描。
+export function getLocalDependencyChartPaths(chartBasePath: string): string[] {
+  const result: string[] = []
+  const visited: Set<string> = new Set<string>()
+
+  const visit = (currentChartPath: string): void => {
+    let realChartPath: string
+    try {
+      realChartPath = fs.realpathSync(currentChartPath)
+    } catch {
+      return
+    }
+    if (visited.has(realChartPath)) { return }
+    visited.add(realChartPath)
+
+    const chartYamlPath: string = path.join(realChartPath, 'Chart.yaml')
+    let chartYaml: yaml.Yaml | undefined
+    try {
+      chartYaml = yaml.load(chartYamlPath)
+    } catch {
+      return
+    }
+    if (typeof chartYaml !== 'object' || chartYaml === null || Array.isArray(chartYaml)) { return }
+
+    const dependencies: unknown = chartYaml.dependencies
+    if (!Array.isArray(dependencies)) { return }
+    for (const dependency of dependencies as ChartDependency[]) {
+      const repository: unknown = dependency?.repository
+      if (typeof repository !== 'string' || !repository.startsWith('file://')) { continue }
+
+      let repositoryPath: string = repository.substring('file://'.length)
+      try { repositoryPath = decodeURIComponent(repositoryPath) } catch { continue }
+      const dependencyPath: string = path.isAbsolute(repositoryPath)
+        ? path.normalize(repositoryPath)
+        : path.resolve(realChartPath, repositoryPath)
+      if (!fs.existsSync(path.join(dependencyPath, 'Chart.yaml'))) { continue }
+
+      let realDependencyPath: string
+      try {
+        realDependencyPath = fs.realpathSync(dependencyPath)
+      } catch {
+        continue
+      }
+      if (!visited.has(realDependencyPath)) {
+        result.push(realDependencyPath)
+        visit(realDependencyPath)
+      }
+    }
+  }
+
+  visit(chartBasePath)
+  return result
+}
+
+// 获取当前 chart 及其全部 file:// 递归依赖。当前 chart 始终位于首位。
+export function getChartPathsWithLocalDependencies(chartBasePath: string): string[] {
+  return [chartBasePath, ...getLocalDependencyChartPaths(chartBasePath)]
+}
+
+// 获取当前 chart 及 file:// 依赖的 Chart.yaml 文件。
+export function getChartFilesWithLocalDependencies(chartBasePath: string): string[] {
+  const files: Set<string> = new Set<string>()
+  for (const chartPath of getChartPathsWithLocalDependencies(chartBasePath)) {
+    for (const chartFile of getChartFileFromConfig(chartPath)) { files.add(chartFile) }
+  }
+  return Array.from(files)
+}
+
+// 获取当前 chart 及 file:// 依赖的 values 文件。
+// 依赖先于父 chart，确保合并时父 chart 的值具有更高优先级。
+export function getValueFileNamesWithLocalDependencies(chartBasePath: string, coverFiles?: string[] | undefined): string[] {
+  const files: Set<string> = new Set<string>()
+  const chartPaths: string[] = getChartPathsWithLocalDependencies(chartBasePath).reverse()
+  const reverse: boolean = vscode.workspace.getConfiguration('helm-intellisense-x').get('valuesReverse', false)
+  for (const chartPath of chartPaths) {
+    const valuesFiles: string[] = getValueFileNamesFromConfig(chartPath, coverFiles)
+    if (reverse) { valuesFiles.reverse() }
+    for (const valuesFile of valuesFiles) { files.add(valuesFile) }
+  }
+  return Array.from(files)
+}
+
+// 获取当前 chart 和 file:// 本地依赖中配置的模板定义文件。
+export function getTemplateFilesWithLocalDependencies(chartBasePath: string, coverFiles?: string[] | undefined): string[] {
+  const chartPaths: string[] = getChartPathsWithLocalDependencies(chartBasePath)
+  const files: Set<string> = new Set<string>()
+  for (const chartPath of chartPaths) {
+    for (const templateFile of getTemplatesFileFromConfig(chartPath, coverFiles)) {
+      files.add(templateFile)
+    }
+  }
+  return Array.from(files)
+}
+
+// 获取 charts/<dependency>/ 下以目录形式解压的直接依赖 chart。
+function getUnpackedDependencyChartPaths(chartBasePath: string): string[] {
+  const chartFiles: string[] = globSync('charts/*/Chart.yaml', {
+    cwd: chartBasePath,
+    absolute: true,
+    nodir: true,
+    dot: true
+  })
+  const result: string[] = []
+  const visited: Set<string> = new Set<string>()
+  for (const chartFile of chartFiles) {
+    try {
+      const chartPath: string = fs.realpathSync(path.dirname(chartFile))
+      if (!visited.has(chartPath)) {
+        visited.add(chartPath)
+        result.push(chartPath)
+      }
+    } catch {
+      continue
+    }
+  }
+  return result
+}
+
+// 获取命名模板扫描覆盖的全部 chart：当前 chart、file:// 依赖和 charts/ 下已解压的依赖。
+// 使用 realpath 去重，同时递归处理已解压依赖自身的 file:// 和 charts/ 依赖。
+function getNamedTemplateChartPaths(chartBasePath: string): string[] {
+  const result: string[] = []
+  const pending: string[] = [chartBasePath]
+  const visited: Set<string> = new Set<string>()
+  while (pending.length > 0) {
+    const currentChartPath: string | undefined = pending.shift()
+    if (currentChartPath === undefined) { continue }
+
+    let realChartPath: string
+    try {
+      realChartPath = fs.realpathSync(currentChartPath)
+    } catch {
+      continue
+    }
+    if (visited.has(realChartPath)) { continue }
+    visited.add(realChartPath)
+    result.push(realChartPath)
+
+    pending.push(...getLocalDependencyChartPaths(realChartPath))
+    pending.push(...getUnpackedDependencyChartPaths(realChartPath))
+  }
+  return result
+}
+
+// 获取当前 chart、file:// 递归依赖和已解压依赖中 templates/ 下的全部普通文件，仅用于命名模板定义扫描。
+export function getNamedTemplateFilesWithLocalDependencies(chartBasePath: string): string[] {
+  const files: Set<string> = new Set<string>()
+  for (const chartPath of getNamedTemplateChartPaths(chartBasePath)) {
+    for (const templateFile of getNamedTemplateFiles(chartPath)) { files.add(templateFile) }
+  }
+  return Array.from(files)
+}
+
+// 收集命名模板及其定义文件，供补全列表展示来源。
+export function getNamedTemplatesWithSources(chartBasePath: string): Map<string, string[]> {
+  const result: Map<string, string[]> = new Map<string, string[]>()
+  for (const templateFile of getNamedTemplateFilesWithLocalDependencies(chartBasePath)) {
+    try {
+      const content: string = fs.readFileSync(templateFile, 'utf8')
+      for (const templateName of getListOfNamedTemplates(content)) {
+        const sources: string[] = result.get(templateName) ?? []
+        if (!sources.includes(templateFile)) { sources.push(templateFile) }
+        result.set(templateName, sources)
+      }
+    } catch (e) {
+      vscode.window.showErrorMessage(`Error in '${templateFile}': ${(e as Error).message}`)
+    }
+  }
+  return result
+}
+
 // 从 *.tpl 文件中解析命名模板（define）和变量定义（$variable := value）。过滤变量定义时，忽略 "$_ := <operator>" 格式
 // parseVariables = false 返回 string[]
 // parseVariables = true 返回 Variable[]
@@ -107,7 +298,9 @@ export function getAllNamedTemplatesAndVariablesFromFiles(fileName: string, work
   const chartBasePath: string | undefined = getChartBasePath(fileName, workspaceFolder)
   if (chartBasePath === undefined) { return [] }
 
-  const tplFiles: string[] = getTemplatesFileFromConfig(chartBasePath)
+  const tplFiles: string[] = parseVariables
+    ? getTemplateFilesWithLocalDependencies(chartBasePath)
+    : getNamedTemplateFilesWithLocalDependencies(chartBasePath)
 
   // 读取文件时使用的模式。可用值 single（默认值，一次读取一个文件）, all（一次性读取所有文件）
   // TODO：分块读取，需要用到异步函数，但是这个地方是同步函数，不知道怎么处理。
@@ -122,8 +315,11 @@ export function getAllNamedTemplatesAndVariablesFromFiles(fileName: string, work
       if (!fs.existsSync(filename)) { continue }
       try {
         const content: string = fs.readFileSync(filename, 'utf8')
-        if (parseVariables) { cleanData.push(...getListOfVariables(content)) }
-        cleanData.push(...getListOfNamedTemplates(content))
+        if (parseVariables) {
+          cleanData.push(...getListOfVariables(content))
+        } else {
+          cleanData.push(...getListOfNamedTemplates(content))
+        }
       } catch (e) {
         vscode.window.showErrorMessage(`Error in '${filename}': ${(e as Error).message}`)
       }
@@ -138,8 +334,11 @@ export function getAllNamedTemplatesAndVariablesFromFiles(fileName: string, work
         vscode.window.showErrorMessage(`Error in '${filename}': ${(e as Error).message}`)
       }
     }
-    if (parseVariables) { cleanData.push(...getListOfVariables(content)) }
-    cleanData.push(...getListOfNamedTemplates(content))
+    if (parseVariables) {
+      cleanData.push(...getListOfVariables(content))
+    } else {
+      cleanData.push(...getListOfNamedTemplates(content))
+    }
   }
   return cleanData
 }
@@ -148,7 +347,7 @@ export function getAllNamedTemplatesAndVariablesFromFiles(fileName: string, work
 export function getListOfNamedTemplates(content: string): string[] {
   const matchRanges: any[] = []
 
-  const templatePattern: RegExp = /{{-?\s*define +"(.+?)"\s*-?}}/g
+  const templatePattern: RegExp = /{{-?\s*define\s+"(.+?)"\s*-?}}/g
   let result
   while ((result = templatePattern.exec(content)) !== null) {
     matchRanges.push(result[1])

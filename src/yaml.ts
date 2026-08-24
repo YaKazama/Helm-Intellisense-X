@@ -27,7 +27,9 @@ export function loadMerge(filenames: string[]): Yaml {
   for (const filename of filenames) {
     const values = load(filename)
     if (values !== undefined) {
-      mergedValues = lodash.merge(mergedValues, values)
+      mergedValues = lodash.mergeWith(mergedValues, values, (_targetValue, sourceValue) => {
+        return Array.isArray(sourceValue) ? sourceValue : undefined
+      })
     }
   }
   return mergedValues

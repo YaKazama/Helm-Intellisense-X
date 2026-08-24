@@ -47,7 +47,7 @@ export class JumpToVariablesDefinitionProvider implements vscode.DefinitionProvi
       const workspaceFolder: string | undefined = vscode.workspace.getWorkspaceFolder(document.uri)?.uri.path
       const chartBasePath: string | undefined = utils.getChartBasePath(document.fileName, workspaceFolder)
       if (chartBasePath === undefined) { return [] }
-      const tplFiles: string[] = utils.getTemplatesFileFromConfig(chartBasePath)
+      const tplFiles: string[] = utils.getTemplateFilesWithLocalDependencies(chartBasePath)
 
       const pattern: RegExp = new RegExp(`\\$\\b${currentString}\\b\\s*:=.*}}`)
 
@@ -55,7 +55,7 @@ export class JumpToVariablesDefinitionProvider implements vscode.DefinitionProvi
       const locations: vscode.Location[] = await findStringInFiles(tplFiles, pattern)
 
       // 2. 在 charts/*.tgz 中搜索
-      const tgzFiles: string[] = tgzChart.getTgzFiles(chartBasePath)
+      const tgzFiles: string[] = tgzChart.getTgzFilesWithLocalDependencies(chartBasePath)
       for (const tgzPath of tgzFiles) {
         const matches: tgzChart.TgzLocation[] = await tgzChart.findVariableInTgz(tgzPath, pattern)
         locations.push(...tgzChart.tgzLocationsToVsLocations(matches))

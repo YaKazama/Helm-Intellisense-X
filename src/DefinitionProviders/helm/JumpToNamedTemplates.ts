@@ -20,14 +20,14 @@ export class JumpToNamedTemplatesDefinitionProvider implements vscode.Definition
     const chartBasePath: string | undefined = utils.getChartBasePath(document.fileName, workspaceFolder)
     if (chartBasePath === undefined) { return [] }
 
-    // 1. 检索 chartRootPath 下配置的模板文件
-    const tplFiles: string[] = utils.getTemplatesFileFromConfig(chartBasePath)
+    // 1. 检索当前 chart、file:// 依赖和 charts/ 下已解压依赖中的模板文件
+    const tplFiles: string[] = utils.getNamedTemplateFilesWithLocalDependencies(chartBasePath)
     const escapedTemplateName: string = currentString.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
     const searchPattern: RegExp = new RegExp(`{{-?\\s*define\\s+"${escapedTemplateName}"\\s*-?}}`)
     const locations: vscode.Location[] = await findStringInFiles(tplFiles, searchPattern)
 
     // 2. 检索 charts/*.tgz 内的命名模板
-    const tgzFiles: string[] = tgzChart.getTgzFiles(chartBasePath)
+    const tgzFiles: string[] = tgzChart.getTgzFilesWithLocalDependencies(chartBasePath)
     for (const tgzPath of tgzFiles) {
       const matches: tgzChart.TgzLocation[] = await tgzChart.findTplNameInTgz(tgzPath, currentString)
       locations.push(...tgzChart.tgzLocationsToVsLocations(matches))

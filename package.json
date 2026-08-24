@@ -15,7 +15,10 @@
   "categories": [
     "Other"
   ],
-  "activationEvents": [],
+  "activationEvents": [
+    "onLanguage:yaml",
+    "onLanguage:helm-template"
+  ],
   "main": "./dist/extension.js",
   "contributes": {
     "commands": [
@@ -87,7 +90,7 @@
           "helm-intellisense-x.chartRootPath": {
             "type": "string",
             "default": "default",
-            "description": "Chart Root Path。可用值为 'default'、'current'、'绝对路径(/path/to/chartRootPath)'"
+            "description": "Chart Root Path。可用值为 'default'、'current'、'绝对路径(/path/to/chartRootPath)'。default 在工作区根目录不是 Chart 时，会从当前文件向上查找最近的 Chart.yaml"
           },
           "helm-intellisense-x.maxRecursionDepthOfRootPath": {
             "type": "number",
@@ -118,14 +121,14 @@
             "default": [
               "**/*.tpl"
             ],
-            "description": "需要加载的 templates 文件或目录。支持 glob 解析"
+            "description": "跨文件变量扫描使用的模板文件，也可补充 templates/ 目录外的命名模板定义文件。命名模板始终扫描 templates/ 下的全部普通文件。支持 glob 解析"
           },
           "helm-intellisense-x.templatesExclude": {
             "type": "array",
             "default": [
               "node_modules/**"
             ],
-            "description": "需要排除的 templates 文件或目录。支持 glob 解析"
+            "description": "需要从模板和命名模板扫描中排除的文件或目录。支持 glob 解析"
           },
           "helm-intellisense-x.chartsIncludeTgz": {
             "type": "boolean",

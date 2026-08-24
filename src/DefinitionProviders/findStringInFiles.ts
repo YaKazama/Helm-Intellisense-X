@@ -31,13 +31,14 @@ function isRegExp(value: any): value is RegExp {
 
 export async function findStringInFiles(fileNames: string[], searchRegexOrString: string | RegExp, startString?: string | undefined, concurrencyLimit = 5): Promise<vscode.Location[]> {
   const results: vscode.Location[] = []
+  const pendingFiles: string[] = [...fileNames]
   let running: number = 0
 
   async function processFile() {
     let flag: boolean = false
     const startStringRegex: RegExp = new RegExp(`^\\b${startString}\\b:`)
-    while (fileNames.length > 0 && running < concurrencyLimit) {
-      const fileName: string | undefined = fileNames.shift()
+    while (pendingFiles.length > 0 && running < concurrencyLimit) {
+      const fileName: string | undefined = pendingFiles.shift()
       if (fileName === undefined) { return undefined }
 
       let searchRegex: RegExp
@@ -76,7 +77,7 @@ export async function findStringInFiles(fileNames: string[], searchRegexOrString
     }
   }
 
-  while (fileNames.length > 0 || running > 0) {
+  while (pendingFiles.length > 0 || running > 0) {
     await processFile()
   }
   return results

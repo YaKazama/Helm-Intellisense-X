@@ -31,30 +31,37 @@ export class ValuesCompletionItemProvider implements vscode.CompletionItemProvid
     return undefined
   }
 
-  // 合并 chartRootPath 下的 values 与 charts/*.tgz 内的 values（tgz 后解析，作为覆盖）
+  // 合并 file:// 依赖及 tgz 中的 values，本地 values 最后合并并保持最高优先级。
   private async getValuesWithTgz(fileName: string, workspaceFolder?: string | undefined): Promise<Yaml | undefined> {
-    let merged: Yaml | undefined = utils.getValuesFromFile(fileName, workspaceFolder)
+    const fileValues: Yaml | undefined = utils.getValuesFromFile(fileName, workspaceFolder)
     const chartBasePath: string | undefined = utils.getChartBasePath(fileName, workspaceFolder)
-    if (chartBasePath === undefined) { return merged }
+    if (chartBasePath === undefined) { return fileValues }
 
     // 加载 tgz 内的 values.yaml（按照配置中定义的 values 文件名列表）
-    const tgzFiles: string[] = tgzChart.getTgzFiles(chartBasePath)
-    if (tgzFiles.length === 0) { return merged }
-
+    const tgzFiles: string[] = tgzChart.getTgzFilesWithLocalDependencies(chartBasePath)
+    const lodash = require('lodash')
+    const mergeValues = (target: Yaml, source: Yaml): Yaml => lodash.mergeWith(
+      target,
+      source,
+      (_targetValue: any, sourceValue: any) => Array.isArray(sourceValue) ? sourceValue : undefined
+    )
+    let merged: Yaml = {}
     const valuesFileNames: string[] = vscode.workspace.getConfiguration('helm-intellisense-x').get('values', ['values.yaml'])
     for (const tgzPath of tgzFiles) {
       const tgzValues: Yaml = await tgzChart.getTgzValuesAsYaml(tgzPath, valuesFileNames)
       if (typeof tgzValues === 'object' && tgzValues !== null && !Array.isArray(tgzValues)) {
-        const lodash = require('lodash')
-        if (merged === undefined) { merged = {} }
-        merged = lodash.merge(merged, tgzValues)
+        merged = mergeValues(merged, tgzValues)
       }
+    }
+    if (typeof fileValues === 'object' && fileValues !== null && !Array.isArray(fileValues)) {
+      merged = mergeValues(merged, fileValues)
     }
     return merged
   }
 
   private updateCurrentKey(currentKey: any, allKeys: string[]): any {
     for (const key of allKeys) {
+      if (typeof currentKey !== 'object' || currentKey === null || Array.isArray(currentKey)) { return undefined }
       if (Array.isArray(currentKey[key])) { return undefined }
       currentKey = currentKey[key]
     }
@@ -63,16 +70,30 @@ export class ValuesCompletionItemProvider implements vscode.CompletionItemProvid
 
   private getCompletionItemList(currentKey: any): vscode.CompletionItem[] {
     const keys: any[] = []
+    if (typeof currentKey !== 'object' || currentKey === null || Array.isArray(currentKey)) { return keys }
     for (const key in currentKey) {
-      switch (typeof currentKey[key]) {
+      const value: any = currentKey[key]
+      if (value === null) {
+        const nullItem = new vscode.CompletionItem(key, vscode.CompletionItemKind.Value)
+        nullItem.detail = 'null'
+        keys.push(nullItem)
+        continue
+      }
+      if (Array.isArray(value)) {
+        const arrayItem = new vscode.CompletionItem(key, vscode.CompletionItemKind.Value)
+        arrayItem.detail = `[${value.length} items]`
+        keys.push(arrayItem)
+        continue
+      }
+      switch (typeof value) {
         case 'object':
           keys.push(new vscode.CompletionItem(key, vscode.CompletionItemKind.Method))
           break
         case 'string':
         case 'boolean':
         case 'number':
-        const valueItem = new vscode.CompletionItem(key, vscode.CompletionItemKind.Field)
-          valueItem.detail = currentKey[key].toString()
+          const valueItem = new vscode.CompletionItem(key, vscode.CompletionItemKind.Field)
+          valueItem.detail = value.toString()
           keys.push(valueItem)
           break
         default:
